@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About - SkillForge</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+<style>
+
+:root{
+  --bg:#0a0c0f;
+  --card:rgba(255,255,255,0.03);
+  --border:#1f2933;
+  --accent:#00f5c4;
+  --text:#ffffff;
+  --muted:#9ca3af;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Syne', sans-serif;
+}
+
+/* LAYOUT */
+.layout{
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  height:100vh;
+  background:rgba(255,255,255,0.02);
+  border-right:1px solid var(--border);
+  padding:20px;
+  backdrop-filter: blur(10px);
+}
+
+.logo-text{
+  font-weight:800;
+  font-size:18px;
+  color:yellow;
+}
+
+.nav-section{
+  margin-top:20px;
+}
+
+.nav-label{
+  font-size:10px;
+  color:var(--muted);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.nav-item{
+  padding:10px;
+  cursor:pointer;
+  border-radius:8px;
+  font-size:13px;
+  transition:0.3s;
+}
+
+.nav-item:hover{
+  background:rgba(255,255,255,0.05);
+  color:var(--accent);
+}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:25px;
+}
+
+/* SECTION */
+.section{
+  margin-bottom:30px;
+  padding:25px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  backdrop-filter: blur(10px);
+}
+
+/* HEADINGS */
+h1{
+  color:yellow;
+  font-size:28px;
+}
+
+h2{
+  font-size:18px;
+  margin-bottom:10px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+/* CARD */
+.card{
+  background:#0f141a;
+  padding:18px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  transition:all 0.3s ease;
+}
+
+.card:hover{
+  border-color:var(--accent);
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 10px 25px rgba(0,245,196,0.1);
+}
+
+.card h3{
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+.card p{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.6;
+}
+
+/* TAGS */
+.tag{
+  display:inline-block;
+  padding:6px 12px;
+  margin:6px 6px 0 0;
+  background:#1f2933;
+  border-radius:20px;
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  transition:0.3s;
+}
+
+.tag:hover{
+  background:var(--accent);
+  color:#000;
+}
+
+/* TEAM */
+.team{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.member{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#0f141a;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  transition:0.3s;
+}
+
+.member:hover{
+  border-color:var(--accent);
+}
+
+/* AVATAR */
+.avatar{
+  width:42px;
+  height:42px;
+  background:var(--accent);
+  color:black;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+/* TEXT */
+p{
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <nav>
+      <div class="nav-section">        
+        <div class="nav-item" onclick="navTo('sec-upload')" src="#dash"><div class="nav-dot"></div><a href="overview_S.html" style="text-decoration: none;color: #6b7280;">Dashboard</a></div>
+        <div class="nav-item" onclick="navTo('sec-upload')" src="assess.html"><div class="nav-dot"></div><a href="assess.html" style="text-decoration: none;color: #6b7280;">Assessment</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item" onclick="navTo('sec-ev')" src="profile.html"><div class="nav-dot"></div><a href="profile.html" style="color: #6b7280;text-decoration: none;">Profile</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item"><div class="nav-dot"></div><a href="setting_S.html" style="text-decoration: none;color: #6b7280;">Setting</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item"><div class="nav-dot"></div><a href="about_S.html" style="text-decoration: none;color: #6b7280;">About</a></div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- HEADER -->
+    <div class="section">
+      <h1>🚀 About SkillForge</h1>
+      <p>
+        SkillForge is an AI-powered platform for EV & Automotive Ecosystem.
+        It analyzes resumes, identifies skill gaps, and prepares users for future mobility.
+      </p>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="section">
+      <h2>📊 Key <span style="color:yellow">Features</span></h2>
+      <div class="grid">
+
+        <div class="card">
+          <h3>📄 Resume Analysis</h3>
+          <p>Extract skills automatically from resumes.</p>
+        </div>
+
+        <div class="card">
+          <h3>📉 Gap Analysis</h3>
+          <p>Identify missing EV skills.</p>
+        </div>
+
+        <div class="card">
+          <h3>⚡ EV Readiness</h3>
+          <p>Measure readiness for EV jobs.</p>
+        </div>
+
+        <div class="card">
+          <h3>📈 Dashboard</h3>
+          <p>Visualize workforce analytics.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MISSION -->
+    <div class="section">
+      <h2>🎯 Mission & <span style="color:yellow">Vision</span></h2>
+      <p>
+        <strong>Mission:</strong> Bridge skill gaps.<br><br>
+        <strong>Vision:</strong> Lead EV workforce transformation.
+      </p>
+    </div>
+
+    <!-- TECH -->
+    <div class="section">
+      <h2>🛠 Tech <span style="color:yellow">Stack</span></h2>
+
+      <span class="tag">HTML</span>
+      <span class="tag">CSS</span>
+      <span class="tag">JavaScript</span>
+      <span class="tag">AI</span>
+    </div>
+
+    <!-- TEAM -->
+    <div class="section">
+      <h2>👨‍💻 Team</h2>
+
+      <div class="team">
+
+        <div class="member">
+          <div class="avatar">SK</div>
+          <div>
+            <div>Suriyakanth J M</div>
+            <div style="font-size:12px;color:var(--muted);">Full Stack</div>
+          </div>
+        </div>
+
+        <div class="member">
+          <div class="avatar">SK</div>
+          <div>
+            <div>Sanjai Kumar E</div>
+            <div style="font-size:12px;color:var(--muted);">Frontend</div>
+          </div>
+        </div>
+        <div class="member">
+          <div class="avatar">SK</div>
+          <div>
+            <div>Sanjay Kumar M</div>
+            <div style="font-size:12px;color:var(--muted);">Backend</div>
+          </div>
+        </div>
+        <div class="member">
+          <div class="avatar"></div>
+          <div>
+            <div>RadhaKrishnan R</div>
+            <div style="font-size:12px;color:var(--muted);">Frontend</div>
+          </div>
+        </div>
+        <div class="member">
+          <div class="avatar">RB</div>
+          <div>
+            <div>Rishabh A M</div>
+            <div style="font-size:12px;color:var(--muted);">AI Integration</div>
+          </div>
+        </div>
+        <div class="member">
+          <div class="avatar">NM</div>
+          <div>
+            <div>Nishantha Moorthy A</div>
+            <div style="font-size:12px;color:var(--muted);">Data Handling</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

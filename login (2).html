@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login / Register</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom right, #d1d5db, #ffffff);
+  }
+
+  .card {
+    background: #1f2937;
+    padding: 30px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+
+  h1 {
+    text-align: center;
+    color: #facc15;
+    margin-bottom: 20px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #374151;
+    color: white;
+  }
+
+  input::placeholder {
+    color: #d1d5db;
+  }
+
+  select {
+    color: #d1d5db;
+  }
+
+  option {
+    background: white;
+    color: black;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .primary-btn {
+    background: #facc15;
+    color: black;
+  }
+
+  .toggle-btn {
+    margin-top: 10px;
+    background: transparent;
+    border: 2px solid #facc15;
+    color: #facc15;
+  }
+
+  p {
+    text-align: center;
+    color: white;
+    margin-top: 10px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1 id="title">Login</h1>
+
+  <form id="form" action="login.php" mehtod="POST">
+    <input type="text" id="username" placeholder="Username" required/>
+    
+    <input type="email" id="email" placeholder="Email" style="display:none"/>
+
+    <select id="role" style="display:none">
+      <option value="">Select Role</option>
+      <option value="student">Student</option>
+      <option value="employee">Employee</option>
+    </select>
+
+    <input type="password" id="password" placeholder="Password" required minlength="8"/>
+    
+    <input type="password" id="confirm" placeholder="Confirm Password" style="display:none"/>
+
+    <button type="submit" class="primary-btn" id="submitBtn">Login</button>
+  </form>
+
+  <p id="text">Not registered?</p>
+  <button class="toggle-btn" id="toggleBtn" style="background-color: #facc15;"><a href="register (2).html" style="text-decoration: none;;color: #0e0e0f;">Register</a></button>
+</div>
+
+<script>
+  const toggleBtn = document.getElementById("toggleBtn");
+  const title = document.getElementById("title");
+  const text = document.getElementById("text");
+  const confirmField = document.getElementById("confirm");
+  const submitBtn = document.getElementById("submitBtn");
+  const emailField = document.getElementById("email");
+  const roleField = document.getElementById("role");
+
+  let isRegister = false;
+
+  toggleBtn.addEventListener("click", () => {
+    isRegister = !isRegister;
+
+    if (isRegister) {
+      title.textContent = "Register";
+      text.textContent = "Already have an account?";
+      toggleBtn.textContent = "Go to Login";
+      submitBtn.textContent = "Register";
+
+      confirmField.style.display = "block";
+      emailField.style.display = "block";
+      roleField.style.display = "block";
+
+    } else {
+      title.textContent = "Login";
+      text.textContent = "Not registered?";
+      toggleBtn.textContent = "Register";
+      submitBtn.textContent = "Login";
+
+      confirmField.style.display = "none";
+      emailField.style.display = "none";
+      roleField.style.display = "none";
+    }
+  });
+
+  document.getElementById("form").addEventListener("submit", (e) => {
+    
+
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm").value;
+    const role = roleField.value;
+
+    if (isRegister) {
+      if (role === "") {
+        alert("Select role");
+        return;
+      }
+
+      if (password !== confirm) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      alert("Registered successfully as " + role);
+    } else {
+      alert("Login successful");
+    }
+  });
+</script>
+
+</body>
+</html>

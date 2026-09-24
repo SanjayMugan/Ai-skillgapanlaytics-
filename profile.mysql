@@ -1,0 +1,28 @@
+-- 1. Create the Database
+CREATE DATABASE IF NOT EXISTS skillforge_db;
+USE skillforge_db;
+
+-- 2. Create the User Profiles Table
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(50) UNIQUE NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    joining_date DATE,
+    bio TEXT,
+    
+    department VARCHAR(100),
+    job_role VARCHAR(100),
+    experience_years INT DEFAULT 0,
+    reporting_manager VARCHAR(100),
+    employee_status VARCHAR(50) DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 3. Insert a Default User (so the PHP "fetch" has something to show)
+-- We use ID 1 because the PHP code is looking for "WHERE id = 1"
+INSERT INTO user_profiles (id, employee_id, first_name, last_name, email, department, job_role, bio)
+VALUES (1, 'EMP-20841', 'Arjun', 'Kumar', 'arjun.kumar@skillforge.io', 'SDV / OTA Systems', 'Workforce Analyst', 'Experienced workforce analyst specialising in EV transition readiness.');

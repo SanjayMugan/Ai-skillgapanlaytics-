@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom right, #e2e6eb, #ffffff);
+    }
+
+    .card {
+      background: #1f2937;
+      padding: 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #facc15;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #374151;
+      color: white;
+    }
+
+    select {
+      cursor: pointer;
+      color: #d1d5db;
+    }
+
+    option {
+      color: black;
+    }
+
+    input::placeholder {
+      color: #d1d5db;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #facc15;
+      color: black;
+    }
+
+    button:hover {
+      background: #eab308;
+    }
+
+    p {
+      text-align: center;
+      color: white;
+      margin-top: 10px;
+    }
+
+    a {
+      color: #facc15;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>Register</h1>
+
+    <form id="registerForm">
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="email" name="email" id="email" placeholder="Email" required />
+      
+      <select name="role" id="role" required>
+        <option value="">Select Role</option>
+        <option value="student">Student</option>
+        <option value="employee">Employee</option>
+      </select>
+
+      <input type="password" id="password" placeholder="Password" required minlength="8"/>
+      <input type="password" id="confirm" placeholder="Confirm Password" required />
+
+      <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? </p>
+    <a href="login.html" style="margin-left: 150px;">Login</a>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm").value;
+      const role = document.getElementById("role").value;
+
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/;
+
+      if (!email.match(emailPattern)) {
+        alert("Invalid email");
+        return;
+      }
+
+      if (role === "") {
+        alert("Please select a role");
+        return;
+      }
+
+      if (password !== confirm) {
+        alert("Passwords do not match");
+        return;
+      }
+
+      alert("Registration successful as " + role);
+    });
+  </script>
+
+</body>
+</html>

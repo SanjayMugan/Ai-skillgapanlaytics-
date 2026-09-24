@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillForge — Skill Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:       #0a0c0f;
+    --surface:  #111318;
+    --surface2: #181c23;
+    --surface3: #1e2330;
+    --border:   rgba(255,255,255,0.07);
+    --accent:   #e8ff47;
+    --accent2:  #00d4ff;
+    --accent3:  #ff6b35;
+    --text:     #f0f2f5;
+    --muted:    #6b7280;
+    --danger:   #ff4444;
+    --success:  #22c55e;
+    --warn:     #f59e0b;
+    --ai:       #a78bfa;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'DM Mono',monospace;
+    min-height:100vh;overflow-x:hidden;
+  }
+
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:0;opacity:.4;
+  }
+  body::after{
+    content:'';position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(232,255,71,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(232,255,71,.03) 1px,transparent 1px);
+    background-size:60px 60px;pointer-events:none;z-index:0;
+  }
+
+  .shell{position:relative;z-index:1;display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .logo{padding:0 24px 28px;border-bottom:1px solid var(--border);}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .logo-icon svg{width:20px;height:20px;}
+  .logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--text);letter-spacing:-.5px;}
+  .logo-sub{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  nav{padding:20px 0;flex:1;}
+  .nav-section{padding:0 16px 8px;}
+  .nav-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 8px 6px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;border:1px solid transparent;margin-bottom:2px;position:relative;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(232,255,71,.08);color:var(--accent);border-color:rgba(232,255,71,.15);}
+  .nav-item.active::before{content:'';position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 2px 2px 0;}
+  .nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;background:rgba(255,107,53,.15);color:var(--accent3);font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid rgba(255,107,53,.2);}
+  .badge-new{margin-left:auto;background:rgba(232,255,71,.1);color:var(--accent);font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid rgba(232,255,71,.2);}
+  .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);}
+  .user-card{display:flex;align-items:center;gap:10px;}
+  .user-avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;}
+  .user-name{font-size:12px;color:var(--text);font-weight:500;}
+  .user-role{font-size:10px;color:var(--muted);}
+
+  /* ═══ MAIN ═══ */
+  .main{display:flex;flex-direction:column;min-height:100vh;}
+  .topbar{background:rgba(10,12,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10;}
+  .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.5px;}
+  .page-title span{color:var(--accent);}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .btn{padding:8px 16px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .2s;border:none;}
+  .btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-accent{background:var(--accent);color:#000;font-weight:500;}
+  .btn-accent:hover{background:#d4eb3c;transform:translateY(-1px);}
+  .btn-accent:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+  .btn-danger{background:rgba(255,68,68,.1);color:var(--danger);border:1px solid rgba(255,68,68,.2);}
+  .btn-danger:hover{background:rgba(255,68,68,.2);}
+
+  /* ═══ SCREENS ═══ */
+  .screen{display:none;animation:fadeIn .4s ease forwards;}
+  .screen.active{display:block;}
+
+  /* ─── SCREEN 1: SETUP ─── */
+  .setup-wrap{max-width:680px;margin:0 auto;padding:40px 32px;display:flex;flex-direction:column;gap:28px;}
+
+  .page-header{animation:slideUp .5s ease .05s forwards;opacity:0;}
+  .eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  .page-header h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1.2;margin-bottom:10px;}
+  .page-header h1 em{font-style:normal;color:var(--accent);}
+  .page-header p{font-size:13px;color:var(--muted);line-height:1.7;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:slideUp .45s ease forwards;opacity:0;}
+  .card:nth-child(1){animation-delay:.1s;}.card:nth-child(2){animation-delay:.17s;}.card:nth-child(3){animation-delay:.24s;}.card:nth-child(4){animation-delay:.31s;}
+  .card-head{padding:16px 22px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.3px;}
+  .card-meta{font-size:10px;color:var(--muted);}
+  .card-body{padding:20px 22px;}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group.full{grid-column:1/-1;}
+  .form-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);}
+  .form-label .req{color:var(--accent);margin-left:2px;}
+  .form-input,.form-select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:'DM Mono',monospace;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%;appearance:none;}
+  .form-input::placeholder{color:var(--muted);}
+  .form-input:focus,.form-select:focus{border-color:rgba(232,255,71,.4);box-shadow:0 0 0 3px rgba(232,255,71,.06);}
+  .form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
+  .form-select option{background:var(--surface2);color:var(--text);}
+
+  /* skill domain selector */
+  .domain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .domain-tile{
+    background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    padding:14px 12px;cursor:pointer;transition:all .2s;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:7px;
+  }
+  .domain-tile:hover{border-color:rgba(255,255,255,.15);}
+  .domain-tile.selected{background:rgba(232,255,71,.07);border-color:rgba(232,255,71,.35);}
+  .domain-tile.selected .domain-icon{background:rgba(232,255,71,.12);}
+  .domain-icon{width:36px;height:36px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;}
+  .domain-name{font-size:11px;font-weight:500;color:var(--text);line-height:1.3;}
+  .domain-q{font-size:10px;color:var(--muted);}
+  .domain-tile.selected .domain-name{color:var(--accent);}
+
+  /* difficulty */
+  .diff-row{display:flex;gap:10px;}
+  .diff-btn{flex:1;padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Mono',monospace;}
+  .diff-btn:hover{border-color:rgba(255,255,255,.15);}
+  .diff-btn.selected{border-color:var(--accent);background:rgba(232,255,71,.07);}
+  .diff-label{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:block;margin-bottom:3px;}
+  .diff-desc{font-size:10px;color:var(--muted);}
+  .diff-btn.selected .diff-label{color:var(--accent);}
+  .d-easy .diff-label{color:var(--success);}
+  .d-medium .diff-label{color:var(--warn);}
+  .d-hard .diff-label{color:var(--danger);}
+
+  /* ─── SCREEN 2: ASSESSMENT ─── */
+  .assess-wrap{max-width:760px;margin:0 auto;padding:32px 32px;display:flex;flex-direction:column;gap:20px;}
+
+  /* progress header */
+  .assess-header{display:flex;flex-direction:column;gap:12px;animation:slideUp .4s ease forwards;opacity:0;}
+  .assess-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .assess-domain{display:flex;align-items:center;gap:8px;}
+  .assess-domain-icon{font-size:18px;}
+  .assess-domain-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+  .assess-count{font-size:12px;color:var(--muted);}
+  .timer-wrap{display:flex;align-items:center;gap:7px;padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;}
+  .timer-icon{font-size:13px;}
+  .timer-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+  .timer-val.warn{color:var(--warn);}
+  .timer-val.danger{color:var(--danger);animation:timerPulse 1s infinite;}
+  @keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+  /* progress bar */
+  .progress-track{height:6px;background:var(--surface2);border-radius:6px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .progress-steps{display:flex;justify-content:space-between;margin-top:6px;}
+  .prog-step{width:8px;height:8px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);transition:all .3s;cursor:default;position:relative;}
+  .prog-step.done{background:var(--accent);border-color:var(--accent);}
+  .prog-step.active{background:var(--accent2);border-color:var(--accent2);box-shadow:0 0 8px rgba(0,212,255,.5);}
+
+  /* question card */
+  .q-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    overflow:hidden;animation:slideUp .35s ease forwards;opacity:0;
+  }
+  .q-card-top{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;}
+  .q-num{
+    width:32px;height:32px;border-radius:8px;flex-shrink:0;
+    background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.2);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--accent);
+  }
+  .q-type-badge{padding:3px 9px;border-radius:20px;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-left:auto;}
+  .qtype-mcq{background:rgba(0,212,255,.1);color:var(--accent2);border:1px solid rgba(0,212,255,.2);}
+  .qtype-tf{background:rgba(232,255,71,.1);color:var(--accent);border:1px solid rgba(232,255,71,.2);}
+  .qtype-rate{background:rgba(167,139,250,.1);color:var(--ai);border:1px solid rgba(167,139,250,.2);}
+  .qtype-scenario{background:rgba(255,107,53,.1);color:var(--accent3);border:1px solid rgba(255,107,53,.2);}
+  .q-text{font-size:15px;color:var(--text);line-height:1.7;font-family:'Fraunces',serif;font-weight:300;}
+
+  /* MCQ options */
+  .q-body{padding:20px 24px;}
+  .options-list{display:flex;flex-direction:column;gap:10px;}
+  .option{
+    display:flex;align-items:center;gap:12px;padding:13px 16px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    cursor:pointer;transition:all .2s;
+  }
+  .option:hover{border-color:rgba(255,255,255,.15);background:var(--surface3);}
+  .option.selected{background:rgba(232,255,71,.07);border-color:rgba(232,255,71,.35);}
+  .option.correct{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.35);}
+  .option.wrong{background:rgba(255,68,68,.08);border-color:rgba(255,68,68,.3);}
+  .opt-key{
+    width:28px;height:28px;border-radius:6px;flex-shrink:0;
+    background:var(--surface);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:600;color:var(--muted);
+    transition:all .2s;
+  }
+  .option.selected .opt-key{background:var(--accent);color:#000;border-color:var(--accent);}
+  .option.correct .opt-key{background:var(--success);color:#000;border-color:var(--success);}
+  .option.wrong .opt-key{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .opt-text{font-size:13px;color:var(--text);line-height:1.5;}
+
+  /* T/F */
+  .tf-row{display:flex;gap:12px;}
+  .tf-btn{
+    flex:1;padding:16px;border-radius:12px;background:var(--surface2);
+    border:1px solid var(--border);cursor:pointer;transition:all .2s;
+    display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'DM Mono',monospace;
+  }
+  .tf-btn:hover{border-color:rgba(255,255,255,.15);}
+  .tf-btn.selected-true{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.35);}
+  .tf-btn.selected-false{background:rgba(255,68,68,.08);border-color:rgba(255,68,68,.35);}
+  .tf-icon{font-size:28px;}
+  .tf-label{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+
+  /* Rating */
+  .rating-wrap{display:flex;flex-direction:column;gap:14px;}
+  .rating-row{display:flex;align-items:center;gap:12px;}
+  .rating-skill{font-size:12px;color:var(--text);width:200px;flex-shrink:0;}
+  .rating-stars{display:flex;gap:6px;}
+  .star{
+    width:32px;height:32px;border-radius:6px;background:var(--surface2);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    font-size:16px;cursor:pointer;transition:all .15s;
+  }
+  .star:hover,.star.active{background:rgba(232,255,71,.12);border-color:rgba(232,255,71,.35);transform:scale(1.08);}
+  .rating-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--muted);width:28px;}
+
+  /* Scenario */
+  .scenario-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;}
+  .scenario-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;}
+  .scenario-text{font-size:12px;color:var(--muted);line-height:1.7;}
+
+  /* feedback bubble */
+  .feedback-bubble{
+    display:none;margin-top:12px;padding:12px 16px;border-radius:10px;
+    font-size:12px;line-height:1.6;border-left:3px solid;
+    animation:fadeIn .3s ease forwards;
+  }
+  .feedback-bubble.correct-fb{background:rgba(34,197,94,.06);border-color:var(--success);color:var(--text);}
+  .feedback-bubble.wrong-fb{background:rgba(255,68,68,.06);border-color:var(--danger);color:var(--text);}
+  .feedback-bubble.show{display:block;}
+
+  /* nav row */
+  .q-nav{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-top:1px solid var(--border);}
+  .q-nav-left{display:flex;gap:10px;align-items:center;}
+  .skip-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Mono',monospace;transition:color .15s;padding:4px 0;}
+  .skip-btn:hover{color:var(--text);}
+
+  /* ─── SCREEN 3: RESULTS ─── */
+  .results-wrap{max-width:820px;margin:0 auto;padding:36px 32px;display:flex;flex-direction:column;gap:24px;}
+
+  .results-hero{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:32px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;
+    animation:slideUp .4s ease .05s forwards;opacity:0;
+    position:relative;overflow:hidden;
+  }
+  .results-hero::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--ai));
+  }
+  .results-score-ring{flex-shrink:0;}
+  .results-info{flex:1;}
+  .results-grade{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+  .results-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;line-height:1.2;}
+  .results-sub{font-size:12px;color:var(--muted);line-height:1.7;max-width:480px;}
+  .results-stats{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap;}
+  .rstat{display:flex;flex-direction:column;gap:3px;}
+  .rstat-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-1px;}
+  .rstat-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+
+  /* domain breakdown */
+  .domain-results{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .dr-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s;}
+  .dr-card:hover{border-color:rgba(255,255,255,.12);}
+  .dr-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .dr-icon{font-size:20px;}
+  .dr-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+  .dr-score{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-1px;}
+  .dr-bar-track{height:5px;background:var(--surface);border-radius:5px;overflow:hidden;margin-bottom:6px;}
+  .dr-bar-fill{height:100%;border-radius:5px;transition:width 1s ease;}
+  .dr-label{font-size:10px;color:var(--muted);}
+
+  /* recommendations strip */
+  .reco-strip{display:flex;flex-direction:column;gap:10px;}
+  .reco-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;transition:border-color .2s;}
+  .reco-item:hover{border-color:rgba(255,255,255,.12);}
+  .reco-num{width:26px;height:26px;border-radius:6px;background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Syne',sans-serif;}
+  .reco-body{flex:1;}
+  .reco-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+  .reco-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+  .reco-tag{margin-left:auto;padding:3px 8px;border-radius:10px;font-size:10px;white-space:nowrap;align-self:flex-start;flex-shrink:0;}
+
+  /* action buttons */
+  .results-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+  /* ANIMATIONS */
+  @keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes countUp{from{opacity:0;}to{opacity:1;}}
+
+  ::-webkit-scrollbar{width:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+    <div class="logo">
+      <a class="logo-mark" href="#">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="logo-text">SkillForge</div>
+          <div class="logo-sub">EV & Auto Analytics</div>
+        </div>
+      </a>
+    </div>
+    <nav>
+      <div class="nav-section">        
+        <div class="nav-item" onclick="navTo('sec-upload')"><div class="nav-dot"></div><a href="overview_S.html" style="text-decoration: none;color: #6b7280;">Dashboard</a></div>
+        <div class="nav-item" onclick="navTo('sec-upload')"><div class="nav-dot"></div><a href="assess.html" style="text-decoration: none;color: #6b7280;">Assessment</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item" onclick="navTo('sec-ev')"><div class="nav-dot"></div><a href="profile.html" style="color: #6b7280;text-decoration: none;">Profile</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item"><div class="nav-dot"></div><a href="setting_S.html" style="text-decoration: none;color: #6b7280;">Setting</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item"><div class="nav-dot"></div><a href="about_S.html" style="text-decoration: none;color: #6b7280;">About</a></div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="page-title" id="topbarTitle">Skill <span>Assessment</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-left:4px;" id="topbarSub">— EV & Automotive Manufacturing</div>
+      <div class="topbar-right" id="topbarActions">
+        <button class="btn btn-ghost" onclick="goScreen('setup')">← Back</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SCREEN 1 — SETUP
+    ══════════════════════════════ -->
+    <div class="screen active" id="screen-setup">
+      <div class="setup-wrap">
+
+        <div class="page-header">
+          <div class="eyebrow">// skill assessment module</div>
+          <h1>Configure Your<br><em>Skill Assessment</em></h1>
+          <p>Select the skill domains you want to be assessed in, choose your difficulty level, and start a timed assessment to generate your personalised gap report.</p>
+        </div>
+
+        <!-- Employee Details -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Attender Details</div>          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Full Name <span class="req">*</span></label>
+                <input class="form-input" id="empName" type="text" value="" placeholder="Full name"/>
+              </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department <span class="req">*</span></label>
+                <select class="form-select" id="empDept">
+                  <option value="Battery Cell Assembly">Battery Cell Assembly</option>
+                  <option value="Power Electronics">Power Electronics</option>
+                  <option value="ADAS Engineering">ADAS Engineering</option>
+                  <option value="Thermal Management">Thermal Management</option>
+                  <option value="SDV / OTA Systems" selected>SDV / OTA Systems</option>
+                  <option value="Quality & Compliance">Quality & Compliance</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain Selection -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Select Skill Domains</div>
+            <div class="card-meta" id="domainCount">0 selected</div>
+          </div>
+          <div class="card-body">
+            <div class="domain-grid" id="domainGrid"></div>
+          </div>
+        </div>
+
+        
+        <!-- Assessment Config Summary -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Assessment Summary</div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px;">
+              <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Questions</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);" id="summaryQ">—</div></div>
+              <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Est. Duration</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent2);" id="summaryTime">—</div></div>
+              <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Domains</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent3);" id="summaryDomains">0</div></div>
+              <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Difficulty</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);" id="summaryDiff">Foundational</div></div>
+            </div>
+            <button class="btn btn-accent" id="startBtn" onclick="startAssessment()" style="width:100%;padding:13px;font-size:14px;" disabled>
+              Start Assessment →
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SCREEN 2 — ASSESSMENT
+    ══════════════════════════════ -->
+    <div class="screen" id="screen-assess">
+      <div class="assess-wrap">
+
+        <!-- Header -->
+        <div class="assess-header">
+          <div class="assess-meta">
+            <div class="assess-domain">
+              <span class="assess-domain-icon" id="aDomainIcon">🔋</span>
+              <span class="assess-domain-name" id="aDomainName">Battery Management Systems</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="assess-count" id="aCount">Question 1 of 10</span>
+              <div class="timer-wrap">
+                <span class="timer-icon">⏱</span>
+                <span class="timer-val" id="timerDisplay">20:00</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="assessProgress" style="width:0%"></div>
+          </div>
+          <div class="progress-steps" id="progressSteps"></div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="q-card" id="questionCard">
+          <div class="q-card-top">
+            <div class="q-num" id="qNum">1</div>
+            <div style="flex:1;padding:0 4px;">
+              <div class="q-text" id="qText">Loading question…</div>
+            </div>
+            <div class="q-type-badge" id="qTypeBadge"></div>
+          </div>
+          <div class="q-body" id="qBody"></div>
+          <div class="q-nav">
+            <div class="q-nav-left">
+              <button class="btn btn-ghost" onclick="prevQuestion()" id="prevBtn" style="font-size:11px;padding:6px 12px;">← Prev</button>
+              <button class="skip-btn" onclick="skipQuestion()">Skip question</button>
+            </div>
+            <button class="btn btn-accent" onclick="nextQuestion()" id="nextBtn">Next →</button>
+          </div>
+        </div>
+
+        <!-- Question Map -->
+        <div class="card" style="animation-delay:.2s;">
+          <div class="card-head">
+            <div class="card-title">Question Map</div>
+            <div class="card-meta" id="mapMeta">0 answered</div>
+          </div>
+          <div class="card-body">
+            <div id="questionMap" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);"><div style="width:14px;height:14px;border-radius:4px;background:rgba(232,255,71,.15);border:1px solid rgba(232,255,71,.3);"></div>Answered</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);"><div style="width:14px;height:14px;border-radius:4px;background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);"></div>Current</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);"><div style="width:14px;height:14px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);"></div>Unanswered</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);"><div style="width:14px;height:14px;border-radius:4px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);"></div>Skipped</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div style="display:flex;justify-content:flex-end;gap:12px;">
+          <button class="btn btn-ghost" onclick="if(confirm('Quit assessment? Progress will be lost.'))goScreen('setup')">Quit</button>
+          <button class="btn btn-accent" id="submitBtn" onclick="submitAssessment()" style="padding:10px 28px;">Submit Assessment ✓</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SCREEN 3 — RESULTS
+    ══════════════════════════════ -->
+    <div class="screen" id="screen-results">
+      <div class="results-wrap">
+
+        <!-- Hero -->
+        <div class="results-hero">
+          <div class="results-score-ring">
+            <canvas id="scoreRingCanvas" width="120" height="120"></canvas>
+          </div>
+          <div class="results-info">
+            <div class="results-grade" id="resultsGrade">—</div>
+            <div class="results-title" id="resultsTitle">—</div>
+            <div class="results-sub" id="resultsSub">—</div>
+            <div class="results-stats">
+              <div class="rstat"><div class="rstat-val" id="rCorrect" style="color:var(--success);">—</div><div class="rstat-lbl">Correct</div></div>
+              <div class="rstat"><div class="rstat-val" id="rWrong" style="color:var(--danger);">—</div><div class="rstat-lbl">Incorrect</div></div>
+              <div class="rstat"><div class="rstat-val" id="rSkipped" style="color:var(--warn);">—</div><div class="rstat-lbl">Skipped</div></div>
+              <div class="rstat"><div class="rstat-val" id="rTime" style="color:var(--accent2);">—</div><div class="rstat-lbl">Time Taken</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain breakdown -->
+        <div class="card" style="animation-delay:.12s;">
+          <div class="card-head"><div class="card-title">Domain Breakdown</div><div class="card-meta">Score per skill area</div></div>
+          <div class="card-body"><div class="domain-results" id="domainResults"></div></div>
+        </div>
+
+        <!-- AI Recommendations from Results -->
+        <div class="card" style="animation-delay:.2s;">
+          <div class="card-head">
+            <div class="card-title">🤖 AI-Generated Recommendations</div>
+            <div class="card-meta">Based on your assessment results</div>
+          </div>
+          <div class="card-body">
+            <div class="reco-strip" id="recoStrip"></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="results-actions" style="animation:slideUp .4s ease .3s forwards;opacity:0;">
+          <button class="btn btn-accent" onclick="goScreen('setup')" style="padding:10px 24px;">Take Another Assessment</button>
+          <button class="btn btn-ghost" onclick="alert('Gap report saved to your profile!')">Save to Profile</button>
+          <button class="btn btn-ghost" onclick="alert('Downloading PDF report…')">↓ Download Report</button>
+          <button class="btn btn-ghost" onclick="alert('Shared with manager!')">Share with Manager</button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DATA
+══════════════════════════════════════ */
+const DOMAINS=[
+  {id:'bms',  icon:'🔋', name:'Battery Management Systems', shortName:'BMS',        qCount:5},
+  {id:'hv',   icon:'⚡', name:'High-Voltage Safety',        shortName:'HV Safety',  qCount:4},
+  {id:'adas', icon:'🤖', name:'ADAS & Sensor Integration',  shortName:'ADAS',       qCount:5},
+  {id:'therm',icon:'🌡', name:'Thermal Management',         shortName:'Thermal',    qCount:4},
+  {id:'sdv',  icon:'💻', name:'SDV / OTA Systems',          shortName:'SDV/OTA',    qCount:4},
+  {id:'power',icon:'⚙', name:'Power Electronics',          shortName:'Power Elec', qCount:4},
+];
+
+const QUESTIONS={
+  bms:[
+    {type:'mcq', text:'A Battery Management System detects that Cell Group 3 has a voltage deviation of +82mV compared to the pack average. What is the most appropriate immediate action?',
+     opts:['Initiate cell balancing on Group 3','Disconnect the battery pack immediately','Increase charging current to equalise voltage','Log the deviation and continue operation'],
+     correct:0, explanation:'Passive or active cell balancing is the correct first response to voltage deviation within safe limits. Immediate disconnection is reserved for safety-critical deviations.'},
+    {type:'tf', text:'A lithium iron phosphate (LFP) cell has a nominal voltage of approximately 3.7V.',
+     correct:false, explanation:'LFP cells have a nominal voltage of ~3.2V, not 3.7V. NMC/NCA chemistry cells operate at ~3.6–3.7V nominal.'},
+    {type:'mcq', text:'Which communication protocol is most commonly used between the BMS and the vehicle\'s main ECU in modern EV architectures?',
+     opts:['RS-232','CAN Bus (ISO 11898)','Bluetooth 5.0','Modbus RTU'],
+     correct:1, explanation:'CAN Bus is the industry standard for intra-vehicle communication, including BMS-ECU data exchange, due to its fault tolerance and real-time capability.'},
+    {type:'rate', text:'Rate your confidence level in the following BMS tasks:',
+     skills:['State of Charge (SoC) estimation','Cell balancing configuration','Thermal runaway detection','BMS fault code diagnostics']},
+    {type:'mcq', text:'What does "State of Health" (SoH) measure in a battery system?',
+     opts:['The current charge level as a percentage of full capacity','The ratio of current maximum capacity to rated capacity','The temperature distribution across cells','The number of completed charge cycles'],
+     correct:1, explanation:'SoH is defined as the ratio of the battery\'s current maximum deliverable capacity to its rated (original) capacity, expressed as a percentage.'},
+  ],
+  hv:[
+    {type:'mcq', text:'Before working on a high-voltage EV system, the minimum safe wait time after disabling the HV system is typically:',
+     opts:['30 seconds','2 minutes','5 minutes','10 minutes'],
+     correct:2, explanation:'Most EV OEM service manuals specify a minimum 5-minute wait after HV system disable and physical disconnect, allowing capacitors in the inverter to discharge to safe levels.'},
+    {type:'tf', text:'Class 0 insulated gloves are rated for use on HV systems above 1000V AC.',
+     correct:false, explanation:'Class 0 gloves are rated for up to 1000V AC / 1500V DC only. Class 2, 3, or 4 gloves are required for voltages above 1000V AC.'},
+    {type:'scenario', text:'During a battery removal procedure, a technician notices the service disconnect plug has been removed but the orange HV cables still feel warm. What should the technician do?',
+     opts:['Continue work — the warm cables are normal','Use a multimeter to verify zero voltage before proceeding','Touch the cables briefly to check for shock risk','Wait 1 minute and begin work'],
+     correct:1, explanation:'Always verify zero voltage with a calibrated meter before touching any HV component. Warm cables indicate residual energy — never proceed without electrical verification.'},
+    {type:'mcq', text:'Which colour universally identifies high-voltage wiring in EV and hybrid vehicles per ISO 6469-3?',
+     opts:['Red','Blue','Orange','Yellow'],
+     correct:2, explanation:'Orange is the internationally standardised colour for HV cabling in electric and hybrid vehicles per ISO 6469-3, enabling quick visual identification.'},
+  ],
+  adas:[
+    {type:'mcq', text:'A LiDAR sensor on an autonomous vehicle is returning inconsistent point cloud data. Which of the following is the LEAST likely cause?',
+     opts:['Contaminated lens surface','Misaligned mounting bracket','Insufficient GPS signal strength','Temperature-induced beam divergence'],
+     correct:2, explanation:'LiDAR operates independently of GPS. GPS signal strength does not affect LiDAR point cloud quality. The other options are all valid causes of LiDAR degradation.'},
+    {type:'tf', text:'Camera-based ADAS systems typically outperform radar in adverse weather conditions such as heavy fog or rain.',
+     correct:false, explanation:'Radar significantly outperforms cameras in adverse weather. Radar waves penetrate fog, rain and snow, while cameras are heavily degraded by such conditions.'},
+    {type:'mcq', text:'In sensor fusion for ADAS, the Kalman Filter is primarily used for:',
+     opts:['Image classification and object detection','Estimating state from noisy sensor measurements','Compressing LiDAR point cloud data','Calibrating camera intrinsic parameters'],
+     correct:1, explanation:'The Kalman Filter is an optimal recursive estimator used to fuse noisy sensor inputs (radar, camera, LiDAR) to produce an accurate, low-noise state estimate for objects.'},
+    {type:'scenario', text:'An ADAS forward collision warning system is generating excessive false positives on highway overpasses. The engineering team needs to debug this.',
+     opts:['Increase the detection sensitivity threshold','Reduce camera frame rate to avoid overpass detection','Re-calibrate radar/camera fusion and review height-filtering parameters','Replace the radar sensor unit'],
+     correct:2, explanation:'Overpass false positives are a classic sensor fusion issue. Re-calibrating the fusion system and applying height-based filters to exclude stationary overhead objects is the correct diagnostic approach.'},
+    {type:'rate', text:'Rate your hands-on experience with the following ADAS technologies:',
+     skills:['Camera calibration & intrinsic parameters','Radar point cloud interpretation','LiDAR-camera extrinsic calibration','ADAS validation & test drives']},
+  ],
+  therm:[
+    {type:'mcq', text:'In an EV thermal management system, what is the primary function of the chiller module?',
+     opts:['Heat the cabin during winter','Cool the battery pack using refrigerant from the AC circuit','Warm the battery to optimal operating temperature','Filter coolant particulates'],
+     correct:1, explanation:'The chiller is a heat exchanger that transfers heat from the battery coolant loop to the refrigerant loop of the air-conditioning system, enabling efficient battery cooling.'},
+    {type:'tf', text:'Lithium-ion batteries perform optimally at temperatures above 45°C during fast charging.',
+     correct:false, explanation:'Li-ion batteries are typically fast-charged optimally between 15–35°C. Above 45°C, degradation accelerates significantly and BMS systems typically derate charging current.'},
+    {type:'mcq', text:'Which thermal runaway indicator appears FIRST in the sequence of events?',
+     opts:['Cell venting with gas emission','Visible flame from the pack','Sharp rise in cell internal resistance followed by voltage drop','External pack surface temperature > 80°C'],
+     correct:2, explanation:'Thermal runaway typically begins with an internal short circuit causing a rise in internal resistance and voltage instability — before visible venting, gas emission, or external temperature spikes.'},
+    {type:'rate', text:'Rate your proficiency in the following thermal management tasks:',
+     skills:['Coolant system bleeding and refill','Chiller valve diagnostics','Thermal runaway response protocol','Battery thermal model interpretation']},
+  ],
+  sdv:[
+    {type:'mcq', text:'In a Software-Defined Vehicle (SDV) architecture, which component is primarily responsible for orchestrating OTA software updates across ECUs?',
+     opts:['The telematics control unit (TCU)','A dedicated Central Vehicle Computer or Zonal Controller','The infotainment head unit','The battery management ECU'],
+     correct:1, explanation:'In modern SDV architectures, a Central Computer or Zonal Controller manages update orchestration, rollback logic, and ECU targeting — not the TCU, which handles connectivity only.'},
+    {type:'tf', text:'FOTA (Firmware Over-The-Air) updates can safely be applied while the vehicle is in motion.',
+     correct:false, explanation:'Critical ECU FOTA updates require the vehicle to be stationary, typically in park/off state, with adequate battery SoC. Applying firmware updates while driving is a safety violation.'},
+    {type:'mcq', text:'What is the primary purpose of a "delta update" in OTA software delivery?',
+     opts:['To update only safety-critical components','To transmit only the changed portions of software, reducing data size','To roll back software to the previous version','To encrypt the update package'],
+     correct:1, explanation:'Delta updates transmit only the binary diff (changes) between the old and new firmware versions, drastically reducing bandwidth and update time compared to full image updates.'},
+    {type:'mcq', text:'Which protocol is most widely adopted for secure vehicle-to-cloud communication in SDV platforms?',
+     opts:['HTTP/1.1 without encryption','MQTT over TLS','Raw CAN over TCP/IP','FTP with password authentication'],
+     correct:1, explanation:'MQTT over TLS is the dominant protocol for IoT/SDV cloud communication — lightweight, publish-subscribe based, with TLS providing the necessary security layer for vehicle data.'},
+  ],
+  power:[
+    {type:'mcq', text:'In a 3-phase inverter for EV motor control, Space Vector Pulse Width Modulation (SVPWM) is preferred over Sinusoidal PWM because:',
+     opts:['It requires fewer power transistors','It achieves ~15% higher DC bus voltage utilisation','It eliminates switching losses entirely','It operates at lower carrier frequencies'],
+     correct:1, explanation:'SVPWM achieves approximately 15.5% higher DC bus utilisation compared to SPWM, enabling higher output voltage and torque from the same DC link voltage.'},
+    {type:'tf', text:'An IGBT (Insulated Gate Bipolar Transistor) is used in EV inverters primarily because it has zero switching losses.',
+     correct:false, explanation:'IGBTs do have switching losses, which increase with frequency. They are chosen for their balance of high voltage/current handling and acceptable switching speed — not zero losses.'},
+    {type:'mcq', text:'What causes "shoot-through" in an H-bridge or inverter leg?',
+     opts:['Excessive gate drive voltage','Both high-side and low-side switches conducting simultaneously','Insufficient DC bus capacitance','Motor back-EMF exceeding bus voltage'],
+     correct:1, explanation:'Shoot-through occurs when both the high-side and low-side transistors in the same inverter leg conduct simultaneously, creating a direct short across the DC bus — a destructive fault.'},
+    {type:'rate', text:'Rate your experience with the following power electronics topics:',
+     skills:['Inverter gate drive circuit design','DC-DC converter topology selection','Motor current loop tuning','Power loss and efficiency analysis']},
+  ],
+};
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let selectedDomains=[];
+let selectedDiff='easy';
+let allQuestions=[];
+let currentQ=0;
+let answers={};   // index → selected answer
+let skipped=new Set();
+let timerInterval=null;
+let secondsLeft=0;
+let startTime=null;
+
+/* ══════════════════════════════════════
+   SETUP SCREEN
+══════════════════════════════════════ */
+function buildDomainGrid(){
+  const grid=document.getElementById('domainGrid');
+  grid.innerHTML='';
+  DOMAINS.forEach(d=>{
+    const t=document.createElement('div');
+    t.className='domain-tile';
+    t.dataset.id=d.id;
+    t.innerHTML=`<div class="domain-icon">${d.icon}</div><div class="domain-name">${d.name}</div><div class="domain-q">${d.qCount} questions</div>`;
+    t.onclick=()=>toggleDomain(d.id,t);
+    grid.appendChild(t);
+  });
+}
+
+function toggleDomain(id,el){
+  const idx=selectedDomains.indexOf(id);
+  if(idx>=0){selectedDomains.splice(idx,1);el.classList.remove('selected');}
+  else{selectedDomains.push(id);el.classList.add('selected');}
+  updateSummary();
+}
+
+function selectDiff(el,diff){
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDiff=diff;
+  document.getElementById('summaryDiff').textContent=el.querySelector('.diff-label').textContent;
+  updateSummary();
+}
+
+function updateSummary(){
+  const total=selectedDomains.reduce((s,id)=>{
+    const d=DOMAINS.find(x=>x.id===id);
+    return s+(d?d.qCount:0);
+  },0);
+  document.getElementById('domainCount').textContent=selectedDomains.length+' selected';
+  document.getElementById('summaryDomains').textContent=selectedDomains.length;
+  document.getElementById('summaryQ').textContent=total||'—';
+  document.getElementById('summaryTime').textContent=total?Math.ceil(total*2)+'m':'—';
+  document.getElementById('startBtn').disabled=selectedDomains.length===0;
+}
+
+/* ══════════════════════════════════════
+   START ASSESSMENT
+══════════════════════════════════════ */
+function startAssessment(){
+  // build question list
+  allQuestions=[];
+  selectedDomains.forEach(id=>{
+    const qs=QUESTIONS[id]||[];
+    qs.forEach(q=>allQuestions.push({...q,domain:id}));
+  });
+  if(allQuestions.length===0)return;
+
+  answers={};
+  skipped=new Set();
+  currentQ=0;
+  secondsLeft=allQuestions.length*120; // 2 min per question
+  startTime=Date.now();
+
+  buildProgressSteps();
+  buildQuestionMap();
+  renderQuestion();
+  startTimer();
+  goScreen('assess');
+}
+
+function buildProgressSteps(){
+  const wrap=document.getElementById('progressSteps');
+  wrap.innerHTML='';
+  allQuestions.forEach((_,i)=>{
+    const s=document.createElement('div');
+    s.className='prog-step';
+    s.id='pstep-'+i;
+    wrap.appendChild(s);
+  });
+}
+
+function buildQuestionMap(){
+  const map=document.getElementById('questionMap');
+  map.innerHTML='';
+  allQuestions.forEach((_,i)=>{
+    const b=document.createElement('div');
+    b.id='qmap-'+i;
+    b.style.cssText='width:32px;height:32px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);';
+    b.textContent=i+1;
+    b.onclick=()=>jumpTo(i);
+    map.appendChild(b);
+  });
+}
+
+/* ══════════════════════════════════════
+   RENDER QUESTION
+══════════════════════════════════════ */
+function renderQuestion(){
+  const q=allQuestions[currentQ];
+  if(!q)return;
+
+  const domain=DOMAINS.find(d=>d.id===q.domain);
+  document.getElementById('aDomainIcon').textContent=domain?domain.icon:'';
+  document.getElementById('aDomainName').textContent=domain?domain.name:'';
+  document.getElementById('aCount').textContent=`Question ${currentQ+1} of ${allQuestions.length}`;
+  document.getElementById('qNum').textContent=currentQ+1;
+  document.getElementById('qText').textContent=q.text;
+
+  // type badge
+  const badge=document.getElementById('qTypeBadge');
+  const types={mcq:['qtype-mcq','MCQ'],tf:['qtype-tf','True / False'],rate:['qtype-rate','Self-Rate'],scenario:['qtype-scenario','Scenario']};
+  const [cls,label]=types[q.type]||['qtype-mcq','MCQ'];
+  badge.className='q-type-badge '+cls;
+  badge.textContent=label;
+
+  // progress
+  document.getElementById('assessProgress').style.width=((currentQ+1)/allQuestions.length*100)+'%';
+
+  // update step dots
+  allQuestions.forEach((_,i)=>{
+    const s=document.getElementById('pstep-'+i);
+    if(!s)return;
+    s.className='prog-step'+(i<currentQ||answers[i]!==undefined?' done':i===currentQ?' active':'');
+  });
+
+  // update map
+  allQuestions.forEach((_,i)=>{
+    const b=document.getElementById('qmap-'+i);
+    if(!b)return;
+    if(i===currentQ){b.style.background='rgba(0,212,255,.15)';b.style.borderColor='rgba(0,212,255,.4)';b.style.color='var(--accent2)';}
+    else if(skipped.has(i)){b.style.background='rgba(245,158,11,.1)';b.style.borderColor='rgba(245,158,11,.25)';b.style.color='var(--warn)';}
+    else if(answers[i]!==undefined){b.style.background='rgba(232,255,71,.12)';b.style.borderColor='rgba(232,255,71,.3)';b.style.color='var(--accent)';}
+    else{b.style.background='var(--surface2)';b.style.borderColor='var(--border)';b.style.color='var(--muted)';}
+  });
+
+  const answered=Object.keys(answers).length;
+  document.getElementById('mapMeta').textContent=answered+' answered · '+skipped.size+' skipped';
+
+  // render body
+  const body=document.getElementById('qBody');
+  body.innerHTML='';
+
+  if(q.type==='mcq'||q.type==='scenario'){
+    if(q.type==='scenario'){
+      body.innerHTML+=`<div class="scenario-box"><div class="scenario-label">// Scenario</div><div class="scenario-text">${q.text}</div></div>`;
+      document.getElementById('qText').textContent='What is the correct course of action?';
+    }
+    const ol=document.createElement('div');ol.className='options-list';
+    const keys=['A','B','C','D'];
+    q.opts.forEach((opt,i)=>{
+      const div=document.createElement('div');
+      div.className='option'+(answers[currentQ]===i?' selected':'');
+      div.innerHTML=`<div class="opt-key">${keys[i]}</div><div class="opt-text">${opt}</div>`;
+      div.onclick=()=>selectAnswer(i,div,q,ol);
+      ol.appendChild(div);
+    });
+    body.appendChild(ol);
+    // show feedback if answered
+    if(answers[currentQ]!==undefined) showFeedback(body,q,answers[currentQ]);
+  }
+  else if(q.type==='tf'){
+    const row=document.createElement('div');row.className='tf-row';
+    ['True','False'].forEach((lbl,i)=>{
+      const btn=document.createElement('div');
+      const val=i===0;
+      btn.className='tf-btn'+(answers[currentQ]===val?' selected-'+(val?'true':'false'):'');
+      btn.innerHTML=`<div class="tf-icon">${i===0?'✓':'✗'}</div><div class="tf-label">${lbl}</div>`;
+      btn.onclick=()=>selectTF(val,btn,row,q);
+      row.appendChild(btn);
+    });
+    body.appendChild(row);
+    if(answers[currentQ]!==undefined) showFeedback(body,q,answers[currentQ]);
+  }
+  else if(q.type==='rate'){
+    const wrap=document.createElement('div');wrap.className='rating-wrap';
+    const saved=answers[currentQ]||{};
+    q.skills.forEach((skill,si)=>{
+      const row=document.createElement('div');row.className='rating-row';
+      row.innerHTML=`<div class="rating-skill">${skill}</div><div class="rating-stars" id="stars-${si}"></div><div class="rating-val" id="rval-${si}">${saved[si]||0}</div>`;
+      wrap.appendChild(row);
+      setTimeout(()=>{
+        const sc=document.getElementById('stars-'+si);
+        if(!sc)return;
+        for(let v=1;v<=5;v++){
+          const s=document.createElement('div');
+          s.className='star'+(saved[si]>=v?' active':'');
+          s.textContent=['','★','★','★','★','★'][v];
+          s.onclick=(()=>{
+            const _v=v,_si=si;
+            return()=>{
+              if(!answers[currentQ])answers[currentQ]={};
+              answers[currentQ][_si]=_v;
+              document.getElementById('rval-'+_si).textContent=_v;
+              document.querySelectorAll('#stars-'+_si+' .star').forEach((x,xi)=>x.classList.toggle('active',xi<_v));
+            };
+          })();
+          sc.appendChild(s);
+        }
+      },0);
+    });
+    body.appendChild(wrap);
+    body.innerHTML+=`<div style="font-size:11px;color:var(--muted);margin-top:12px;">Rate 1 (No experience) → 5 (Expert). Your ratings will be used to map your skill profile.</div>`;
+  }
+
+  // prev/next
+  document.getElementById('prevBtn').disabled=currentQ===0;
+  document.getElementById('nextBtn').textContent=currentQ===allQuestions.length-1?'Finish ✓':'Next →';
+}
+
+function selectAnswer(i,div,q,ol){
+  ol.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  div.classList.add('selected');
+  answers[currentQ]=i;
+  const body=document.getElementById('qBody');
+  // remove old feedback
+  const old=body.querySelector('.feedback-bubble');if(old)old.remove();
+  showFeedback(body,q,i);
+  updateMap();
+}
+
+function selectTF(val,btn,row,q){
+  row.querySelectorAll('.tf-btn').forEach(b=>{b.classList.remove('selected-true','selected-false');});
+  btn.classList.add('selected-'+(val?'true':'false'));
+  answers[currentQ]=val;
+  const body=document.getElementById('qBody');
+  const old=body.querySelector('.feedback-bubble');if(old)old.remove();
+  showFeedback(body,q,val);
+  updateMap();
+}
+
+function showFeedback(body,q,ans){
+  let correct;
+  if(q.type==='mcq'||q.type==='scenario') correct=ans===q.correct;
+  else if(q.type==='tf') correct=ans===q.correct;
+  else return;
+  const fb=document.createElement('div');
+  fb.className='feedback-bubble show '+(correct?'correct-fb':'wrong-fb');
+  fb.innerHTML=`<strong>${correct?'✓ Correct!':'✗ Incorrect'}</strong> — ${q.explanation}`;
+  body.appendChild(fb);
+}
+
+function updateMap(){
+  const answered=Object.keys(answers).length;
+  document.getElementById('mapMeta').textContent=answered+' answered · '+skipped.size+' skipped';
+  const b=document.getElementById('qmap-'+currentQ);
+  if(b){b.style.background='rgba(232,255,71,.12)';b.style.borderColor='rgba(232,255,71,.3)';b.style.color='var(--accent)';}
+  // update step
+  const s=document.getElementById('pstep-'+currentQ);
+  if(s)s.className='prog-step done';
+}
+
+function nextQuestion(){
+  if(currentQ<allQuestions.length-1){currentQ++;renderQuestion();}
+  else submitAssessment();
+}
+function prevQuestion(){if(currentQ>0){currentQ--;renderQuestion();}}
+function jumpTo(i){currentQ=i;renderQuestion();}
+function skipQuestion(){skipped.add(currentQ);if(currentQ<allQuestions.length-1){currentQ++;renderQuestion();}}
+
+/* ══════════════════════════════════════
+   TIMER
+══════════════════════════════════════ */
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    secondsLeft--;
+    if(secondsLeft<=0){clearInterval(timerInterval);submitAssessment();return;}
+    const m=Math.floor(secondsLeft/60),s=secondsLeft%60;
+    const display=document.getElementById('timerDisplay');
+    display.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    display.className='timer-val'+(secondsLeft<=60?' danger':secondsLeft<=180?' warn':'');
+  },1000);
+}
+
+/* ══════════════════════════════════════
+   SUBMIT & RESULTS
+══════════════════════════════════════ */
+function submitAssessment(){
+  clearInterval(timerInterval);
+
+  // score per domain
+  const domainScores={};
+  const domainTotal={};
+  selectedDomains.forEach(id=>{domainScores[id]=0;domainTotal[id]=0;});
+
+  let correct=0,wrong=0,skippedCount=0;
+  allQuestions.forEach((q,i)=>{
+    const d=q.domain;
+    if(skipped.has(i)){skippedCount++;return;}
+    if(answers[i]===undefined){skippedCount++;return;}
+    if(q.type==='rate'){
+      // rating questions get partial credit
+      const r=answers[i]||{};
+      const avg=q.skills.reduce((s,_,si)=>s+(r[si]||0),0)/(q.skills.length*5);
+      domainScores[d]+=avg;domainTotal[d]+=1;
+      return;
+    }
+    domainTotal[d]+=1;
+    let isCorrect=false;
+    if(q.type==='mcq'||q.type==='scenario') isCorrect=answers[i]===q.correct;
+    else if(q.type==='tf') isCorrect=answers[i]===q.correct;
+    if(isCorrect){correct++;domainScores[d]+=1;}
+    else{wrong++;}
+  });
+
+  const timeTaken=Math.round((Date.now()-startTime)/1000);
+  const totalScored=allQuestions.filter(q=>q.type!=='rate'&&!skipped.has(allQuestions.indexOf(q))).length;
+  const pct=totalScored>0?Math.round(correct/totalScored*100):0;
+
+  // grade
+  let grade,title,sub,gradeColor;
+  if(pct>=85){grade='EV EXPERT';title='Outstanding Performance';sub='You demonstrated expert-level knowledge across EV systems. Your skill profile is well above the target threshold for 2026 EV readiness.';gradeColor='var(--success)';}
+  else if(pct>=70){grade='PRACTITIONER';title='Strong Foundational Knowledge';sub='You have solid EV knowledge with a few gaps to address. Targeted upskilling in weaker domains will get you to full readiness.';gradeColor='var(--accent)';}
+  else if(pct>=50){grade='DEVELOPING';title='Core Skills Present — Gaps Identified';sub='You have core knowledge but significant gaps exist in key EV domains. An AI-recommended learning path has been generated for you.';gradeColor='var(--warn)';}
+  else{grade='FOUNDATIONAL';title='Significant Upskilling Required';sub='Your assessment reveals substantial gaps across EV skill domains. Urgent enrolment in foundational training programmes is recommended.';gradeColor='var(--danger)';}
+
+  document.getElementById('resultsGrade').textContent=grade;document.getElementById('resultsGrade').style.color=gradeColor;
+  document.getElementById('resultsTitle').textContent=title;
+  document.getElementById('resultsSub').textContent=sub;
+  document.getElementById('rCorrect').textContent=correct;
+  document.getElementById('rWrong').textContent=wrong;
+  document.getElementById('rSkipped').textContent=skippedCount;
+  const tm=Math.floor(timeTaken/60)+'m '+timeTaken%60+'s';
+  document.getElementById('rTime').textContent=tm;
+
+  // draw score ring
+  drawScoreRing(pct,gradeColor);
+
+  // domain breakdown
+  const dr=document.getElementById('domainResults');dr.innerHTML='';
+  selectedDomains.forEach(id=>{
+    const d=DOMAINS.find(x=>x.id===id);
+    const total=domainTotal[id]||1;
+    const score=Math.round((domainScores[id]/total)*100);
+    const barColor=score>=80?'var(--success)':score>=60?'var(--warn)':score>=40?'var(--accent3)':'var(--danger)';
+    dr.innerHTML+=`
+      <div class="dr-card" style="animation:slideUp .4s ease ${selectedDomains.indexOf(id)*.08}s forwards;opacity:0;">
+        <div class="dr-top">
+          <span class="dr-icon">${d.icon}</span>
+          <span class="dr-name">${d.shortName}</span>
+          <span class="dr-score" style="color:${barColor};">${score}%</span>
+        </div>
+        <div class="dr-bar-track"><div class="dr-bar-fill" style="width:${score}%;background:${barColor};"></div></div>
+        <div class="dr-label">${score>=80?'✓ On target':score>=50?'Needs improvement':'Critical gap'}</div>
+      </div>`;
+  });
+
+  // AI recommendations
+  const reco=document.getElementById('recoStrip');reco.innerHTML='';
+  const recos=generateRecos(domainScores,domainTotal,selectedDomains);
+  recos.forEach((r,i)=>{
+    const tagColor=r.urgency==='Critical'?'background:rgba(255,68,68,.1);color:var(--danger);border:1px solid rgba(255,68,68,.2);':r.urgency==='High'?'background:rgba(255,107,53,.1);color:var(--accent3);border:1px solid rgba(255,107,53,.2);':'background:rgba(34,197,94,.1);color:var(--success);border:1px solid rgba(34,197,94,.2);';
+    reco.innerHTML+=`
+      <div class="reco-item" style="animation:slideUp .4s ease ${i*.07}s forwards;opacity:0;">
+        <div class="reco-num">${i+1}</div>
+        <div class="reco-body">
+          <div class="reco-title">${r.title}</div>
+          <div class="reco-desc">${r.desc}</div>
+        </div>
+        <div class="reco-tag" style="${tagColor}">${r.urgency}</div>
+      </div>`;
+  });
+
+  goScreen('results');
+}
+
+function generateRecos(scores,totals,domains){
+  const recMap={
+    bms:{title:'Enrol in BMS Bootcamp — Q2 2026',desc:'Your BMS score indicates critical gaps in cell chemistry and fault diagnostics. A structured 8-week bootcamp is recommended.',urgency:'Critical'},
+    hv:{title:'Complete HV Safety Certification Renewal',desc:'High-voltage safety is a mandatory compliance requirement. Schedule certification within the next 30 days.',urgency:'Critical'},
+    adas:{title:'ADAS Simulation Lab Training',desc:'Sensor fusion and calibration skills need strengthening. Hands-on sim-lab sessions will accelerate your competency.',urgency:'High'},
+    therm:{title:'Thermal Management Online Module TM-201',desc:'Focused eLearning on thermal runaway protocols and chiller diagnostics will close your identified gaps.',urgency:'High'},
+    sdv:{title:'SDV / OTA Advanced Practitioner Course',desc:'Your OTA and delta-update knowledge needs deepening. The SDV advanced course covers architecture and security.',urgency:'Medium'},
+    power:{title:'Power Electronics Hands-on Lab',desc:'Inverter calibration and loss analysis require practical lab experience with real EV drivetrain hardware.',urgency:'High'},
+  };
+  return domains
+    .map(id=>({id,score:Math.round(((scores[id]||0)/(totals[id]||1))*100)}))
+    .sort((a,b)=>a.score-b.score)
+    .slice(0,4)
+    .map(({id})=>recMap[id])
+    .filter(Boolean);
+}
+
+function drawScoreRing(pct,color){
+  const canvas=document.getElementById('scoreRingCanvas');
+  const ctx=canvas.getContext('2d');
+  const cx=60,cy=60,r=50;
+  ctx.clearRect(0,0,120,120);
+
+  // bg ring
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=8;ctx.stroke();
+
+  // score arc
+  const angle=(pct/100)*Math.PI*2-Math.PI/2;
+  ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,angle);
+  ctx.strokeStyle=color;ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
+
+  // text
+  ctx.fillStyle='#f0f2f5';ctx.font='bold 22px Syne';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(pct+'%',cx,cy-6);
+  ctx.font='10px DM Mono';ctx.fillStyle='rgba(255,255,255,.4)';
+  ctx.fillText('SCORE',cx,cy+14);
+}
+
+/* ══════════════════════════════════════
+   SCREEN NAVIGATION
+══════════════════════════════════════ */
+function goScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+
+  // update topbar
+  const titles={
+    setup:['Skill <span style="color:var(--accent)">Assessment</span>','— EV & Automotive Manufacturing'],
+    assess:['Assessment <span style="color:var(--accent)">In Progress</span>','— Answer all questions'],
+    results:['Assessment <span style="color:var(--success)">Complete</span>','— Your skill gap report'],
+  };
+  document.getElementById('topbarTitle').innerHTML=titles[name][0];
+  document.getElementById('topbarSub').textContent=titles[name][1];
+
+  const actions=document.getElementById('topbarActions');
+  if(name==='setup'){actions.innerHTML='';}
+  else if(name==='assess'){actions.innerHTML=`<span style="font-size:11px;color:var(--muted);" id="topbarProgress">—</span>`;}
+  else if(name==='results'){actions.innerHTML=`<button class="btn btn-ghost" onclick="goScreen('setup')">← New Assessment</button><button class="btn btn-accent" onclick="alert('Saved!')">Save Report</button>`;}
+
+  if(name!=='assess'){clearInterval(timerInterval);}
+  window.scrollTo(0,0);
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+buildDomainGrid();
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

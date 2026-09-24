@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillForge — Resume-Driven Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0c0f; --surface:#111318; --surface2:#181c23;
+  --border:rgba(255,255,255,0.07);
+  --accent:#e8ff47; --accent2:#00d4ff; --accent3:#ff6b35;
+  --text:#f0f2f5; --muted:#6b7280;
+  --danger:#ff4444; --success:#22c55e; --warn:#f59e0b; --ai:#a78bfa;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(232,255,71,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(232,255,71,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+.shell{position:relative;z-index:1;display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.logo{padding:0 24px 28px;border-bottom:1px solid var(--border);}
+.logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-icon svg{width:20px;height:20px;}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--text);letter-spacing:-.5px;}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+nav{padding:20px 0;flex:1;}
+.nav-section{padding:0 16px 8px;}
+.nav-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;border:1px solid transparent;margin-bottom:2px;position:relative;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(232,255,71,.08);color:var(--accent);border-color:rgba(232,255,71,.15);}
+.nav-item.active::before{content:'';position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 2px 2px 0;}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.badge{margin-left:auto;background:rgba(255,107,53,.15);color:var(--accent3);font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid rgba(255,107,53,.2);}
+.badge-new{margin-left:auto;background:rgba(232,255,71,.1);color:var(--accent);font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid rgba(232,255,71,.2);}
+.sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);}
+.user-card{display:flex;align-items:center;gap:10px;}
+.user-avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;}
+.user-name{font-size:12px;color:var(--text);font-weight:500;}
+.user-role{font-size:10px;color:var(--muted);}
+
+/* ── MAIN ── */
+.main{display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:rgba(10,12,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10;}
+.page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.5px;}
+.page-title span{color:var(--accent);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .2s;border:none;}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-accent{background:var(--accent);color:#000;font-weight:500;}
+.btn-accent:hover{background:#d4eb3c;transform:translateY(-1px);}
+.btn-accent:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+
+/* ── CONTENT ── */
+.content{padding:28px 32px;flex:1;display:flex;flex-direction:column;gap:22px;}
+
+/* ── SECTION DIVIDER ── */
+.section-divider{display:flex;align-items:center;gap:14px;padding:4px 0;}
+.sdl{flex:1;height:1px;background:var(--border);}
+.sdlabel{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap;}
+.sdlabel span{padding:3px 10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;}
+.sddot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* ── RESUME UPLOAD ZONE ── */
+.upload-card{background:var(--surface);border:1px solid rgba(232,255,71,.2);border-radius:14px;overflow:hidden;position:relative;}
+.upload-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);}
+.upload-card-head{padding:16px 22px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.upload-card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.3px;}
+.upload-card-body{padding:20px 22px;}
+
+.drop-zone{border:2px dashed var(--border);border-radius:12px;padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;transition:all .25s;background:var(--surface2);text-align:center;position:relative;}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(232,255,71,.04);box-shadow:0 0 40px rgba(232,255,71,.05) inset;}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-ring{width:60px;height:60px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;transition:all .25s;position:relative;}
+.dz-ring::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(232,255,71,.2);animation:spinRing 10s linear infinite;}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+.dz-ring svg{width:24px;height:24px;color:var(--accent);}
+.dz-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+.dz-sub{font-size:12px;color:var(--muted);}
+.dz-sub strong{color:var(--accent);}
+.fmt-pills{display:flex;gap:7px;}
+.fmt-pill{padding:3px 10px;border-radius:20px;font-size:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);}
+
+/* file preview */
+.file-preview{display:none;align-items:center;gap:12px;padding:14px 16px;background:var(--surface2);border:1px solid rgba(232,255,71,.15);border-radius:10px;}
+.file-preview.show{display:flex;}
+.file-icon-box{width:40px;height:40px;border-radius:9px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.file-info{flex:1;min-width:0;}
+.file-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.file-size{font-size:10px;color:var(--muted);}
+.file-ok{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--success);margin-top:3px;}
+.file-ok-dot{width:5px;height:5px;border-radius:50%;background:var(--success);}
+.file-rm{width:28px;height:28px;border-radius:6px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.15);color:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;transition:all .15s;}
+.file-rm:hover{background:rgba(255,68,68,.18);}
+
+/* progress */
+.upload-progress{display:none;flex-direction:column;gap:8px;}
+.upload-progress.show{display:flex;}
+.progress-header{display:flex;justify-content:space-between;font-size:11px;}
+.progress-pct-val{color:var(--accent);font-weight:600;font-family:'Syne',sans-serif;}
+.progress-track{height:6px;background:var(--surface2);border-radius:6px;overflow:hidden;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;width:0%;transition:width .3s ease;position:relative;overflow:hidden;}
+.progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:shimmer 1.4s infinite;}
+@keyframes shimmer{from{transform:translateX(-100%);}to{transform:translateX(100%);}}
+.progress-steps{display:flex;gap:10px;flex-wrap:wrap;}
+.p-step{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);transition:color .3s;}
+.p-step.done{color:var(--success);}
+.p-step.active{color:var(--accent2);}
+.p-step-icon{width:14px;height:14px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;}
+.p-step.done .p-step-icon{background:var(--success);border-color:var(--success);color:#000;}
+.p-step.active .p-step-icon{animation:pstepPulse 1.5s infinite;}
+@keyframes pstepPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.4);}50%{box-shadow:0 0 0 4px rgba(0,212,255,0);}}
+
+/* empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px 20px;text-align:center;}
+.empty-icon{font-size:40px;opacity:.3;}
+.empty-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--muted);}
+.empty-sub{font-size:12px;color:var(--muted);opacity:.7;max-width:340px;line-height:1.7;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.card-head{padding:15px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.3px;}
+.card-meta{font-size:10px;color:var(--muted);}
+.card-body{padding:18px 20px;}
+.card-body-np{padding:0;}
+
+/* ── KPI ROWS ── */
+.kpi-row{display:grid;gap:14px;}
+.kpi-row-5{grid-template-columns:repeat(5,1fr);}
+.kpi-row-4{grid-template-columns:repeat(4,1fr);}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default;}
+.kpi-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.12);}
+.kpi-card::before{content:'';position:absolute;top:0;right:0;width:70px;height:70px;border-radius:0 14px 0 70px;opacity:.07;}
+.kpi-card.c1::before{background:var(--accent);}
+.kpi-card.c2::before{background:var(--accent2);}
+.kpi-card.c3::before{background:var(--accent3);}
+.kpi-card.c4::before{background:var(--danger);}
+.kpi-card.c5::before{background:var(--success);}
+.kpi-card.c6::before{background:var(--warn);}
+.kpi-card.c7::before{background:var(--ai);}
+.kpi-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.kpi-value{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:6px;transition:all .5s ease;}
+.kpi-card.c1 .kpi-value{color:var(--accent);}
+.kpi-card.c2 .kpi-value{color:var(--accent2);}
+.kpi-card.c3 .kpi-value{color:var(--accent3);}
+.kpi-card.c4 .kpi-value{color:var(--danger);}
+.kpi-card.c5 .kpi-value{color:var(--success);}
+.kpi-card.c6 .kpi-value{color:var(--warn);}
+.kpi-card.c7 .kpi-value{color:var(--ai);}
+.kpi-sub{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.kpi-trend{font-size:10px;padding:2px 6px;border-radius:4px;}
+.trend-up{background:rgba(34,197,94,.12);color:var(--success);}
+.trend-dn{background:rgba(255,68,68,.12);color:var(--danger);}
+.trend-nt{background:rgba(107,114,128,.12);color:var(--muted);}
+
+/* updated flash */
+@keyframes kpiFlash{0%{opacity:.4;transform:scale(.95);}100%{opacity:1;transform:scale(1);}}
+.kpi-updated{animation:kpiFlash .5s ease forwards;}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g32{display:grid;grid-template-columns:3fr 2fr;gap:16px;}
+.g23{display:grid;grid-template-columns:2fr 3fr;gap:16px;}
+
+/* ── SKILL BARS ── */
+.skill-list{display:flex;flex-direction:column;gap:12px;}
+.skill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.skill-name{font-size:12px;color:var(--text);}
+.skill-scores{display:flex;gap:7px;align-items:center;font-size:10px;}
+.score-curr{color:var(--muted);}
+.score-tgt{color:var(--accent2);}
+.bar-track{height:6px;background:var(--surface2);border-radius:6px;position:relative;}
+.bar-fill{height:100%;border-radius:6px;transition:width 1.2s cubic-bezier(.4,0,.2,1);position:relative;}
+.bar-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;border:2px solid var(--bg);}
+.bar-target{position:absolute;top:-3px;width:2px;height:12px;background:var(--accent2);border-radius:1px;}
+.gap-critical .bar-fill{background:linear-gradient(90deg,var(--danger),#ff6b6b);}
+.gap-critical .bar-fill::after{background:var(--danger);}
+.gap-critical .score-gap{color:var(--danger);}
+.gap-high .bar-fill{background:linear-gradient(90deg,var(--accent3),#ff9a6b);}
+.gap-high .bar-fill::after{background:var(--accent3);}
+.gap-high .score-gap{color:var(--accent3);}
+.gap-medium .bar-fill{background:linear-gradient(90deg,var(--warn),#fcd34d);}
+.gap-medium .bar-fill::after{background:var(--warn);}
+.gap-medium .score-gap{color:var(--warn);}
+.gap-low .bar-fill{background:linear-gradient(90deg,var(--success),#4ade80);}
+.gap-low .bar-fill::after{background:var(--success);}
+.gap-low .score-gap{color:var(--success);}
+
+/* ── HEATMAP ── */
+.heatmap-grid{display:grid;gap:4px;align-items:center;}
+.hm-label{font-size:10px;color:var(--muted);text-align:right;padding-right:8px;}
+.hm-col-label{font-size:9px;color:var(--muted);text-align:center;letter-spacing:.5px;}
+.hm-cell{height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.hm-cell:hover{transform:scale(1.1);box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:2;}
+.h0{background:rgba(34,197,94,.15);color:var(--success);}
+.h1{background:rgba(245,158,11,.15);color:var(--warn);}
+.h2{background:rgba(255,107,53,.2);color:var(--accent3);}
+.h3{background:rgba(255,68,68,.2);color:var(--danger);}
+.h4{background:rgba(255,68,68,.38);color:#ff8080;}
+
+/* ── DEPT TABLE ── */
+.dept-table{width:100%;border-collapse:collapse;}
+.dept-table th{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;}
+.dept-table th:hover{color:var(--text);}
+.dept-table td{font-size:12px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;}
+.dept-table tr:last-child td{border-bottom:none;}
+.dept-table tbody tr:hover td{background:var(--surface2);}
+.dept-table td:first-child{font-weight:500;}
+.risk-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;}
+.risk-critical{background:rgba(255,68,68,.1);color:var(--danger);border:1px solid rgba(255,68,68,.2);}
+.risk-high{background:rgba(255,107,53,.1);color:var(--accent3);border:1px solid rgba(255,107,53,.2);}
+.risk-medium{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.2);}
+.risk-low{background:rgba(34,197,94,.1);color:var(--success);border:1px solid rgba(34,197,94,.2);}
+.mini-bar-wrap{width:80px;}
+.mini-bar-track{height:4px;background:var(--surface2);border-radius:4px;}
+.mini-bar-fill{height:100%;border-radius:4px;}
+
+/* ── EV BLOCKS ── */
+.ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ev-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .2s;}
+.ev-block:hover{border-color:rgba(0,212,255,.3);}
+.ev-block-icon{font-size:20px;margin-bottom:7px;}
+.ev-block-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.ev-block-stat{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent2);letter-spacing:-1px;transition:all .5s ease;}
+.ev-block-label{font-size:10px;color:var(--muted);margin-top:1px;}
+.ev-block-bar{margin-top:9px;height:3px;background:var(--border);border-radius:3px;overflow:hidden;}
+.ev-block-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width .8s ease;}
+
+/* ── ALERTS ── */
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border-radius:8px;border-left:3px solid;}
+.alert-critical{background:rgba(255,68,68,.06);border-color:var(--danger);}
+.alert-warn{background:rgba(245,158,11,.06);border-color:var(--warn);}
+.alert-info{background:rgba(0,212,255,.06);border-color:var(--accent2);}
+.alert-icon{font-size:13px;flex-shrink:0;margin-top:2px;}
+.alert-text{font-size:11px;color:var(--text);line-height:1.5;}
+.alert-text strong{font-weight:500;}
+.alert-time{font-size:9px;color:var(--muted);margin-top:3px;}
+
+/* ── ROADMAP ── */
+.roadmap{position:relative;padding:10px 0 4px;}
+.roadmap-line{position:absolute;top:18px;left:0;right:0;height:2px;background:var(--border);}
+.roadmap-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .8s ease;}
+.roadmap-nodes{display:grid;grid-template-columns:repeat(5,1fr);position:relative;z-index:1;}
+.rm-node{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.rm-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:var(--bg);transition:all .4s;flex-shrink:0;}
+.rm-node.done .rm-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(232,255,71,.4);}
+.rm-node.active .rm-dot{background:var(--accent2);border-color:var(--accent2);box-shadow:0 0 12px rgba(0,212,255,.4);animation:pulseDot 2s infinite;}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 12px rgba(0,212,255,.4);}50%{box-shadow:0 0 22px rgba(0,212,255,.7);}}
+.rm-label{font-size:10px;color:var(--muted);text-align:center;line-height:1.4;}
+.rm-node.done .rm-label{color:var(--accent);}
+.rm-node.active .rm-label{color:var(--accent2);}
+.rm-date{font-size:9px;color:var(--muted);opacity:.55;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px;}
+.tab{padding:5px 12px;border-radius:6px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);cursor:pointer;transition:all .15s;border:none;background:none;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+
+/* ── TOOLTIP ── */
+[data-tip]{position:relative;}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100%+6px);left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 9px;border-radius:6px;font-size:10px;white-space:nowrap;pointer-events:none;z-index:99;}
+
+/* ── MATRIX ── */
+.matrix-wrap{display:grid;grid-template-columns:24px 1fr 1fr;grid-template-rows:1fr 1fr 24px;gap:6px;height:220px;}
+.matrix-axis-y{writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;grid-row:1/3;grid-column:1;}
+.matrix-axis-x{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;grid-row:3;grid-column:2/4;}
+.matrix-cell{border-radius:10px;border:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:5px;cursor:default;transition:border-color .2s;}
+.matrix-cell:hover{border-color:rgba(255,255,255,.14);}
+.mc-tl{background:rgba(245,158,11,.04);}
+.mc-tr{background:rgba(255,68,68,.06);}
+.mc-bl{background:rgba(34,197,94,.04);}
+.mc-br{background:rgba(255,107,53,.04);}
+.matrix-cell-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.mb{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;border:1px solid;width:fit-content;margin-top:2px;}
+.mb-danger{background:rgba(255,68,68,.1);color:var(--danger);border-color:rgba(255,68,68,.25);}
+.mb-warn{background:rgba(245,158,11,.1);color:var(--warn);border-color:rgba(245,158,11,.25);}
+.mb-orange{background:rgba(255,107,53,.1);color:var(--accent3);border-color:rgba(255,107,53,.25);}
+.mb-success{background:rgba(34,197,94,.1);color:var(--success);border-color:rgba(34,197,94,.25);}
+.mb-cyan{background:rgba(0,212,255,.1);color:var(--accent2);border-color:rgba(0,212,255,.25);}
+
+/* ── ANIMATIONS ── */
+@keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.kpi-card{animation:slideUp .5s ease forwards;opacity:0;}
+.kpi-row-5 .kpi-card:nth-child(1){animation-delay:.04s;}.kpi-row-5 .kpi-card:nth-child(2){animation-delay:.08s;}.kpi-row-5 .kpi-card:nth-child(3){animation-delay:.12s;}.kpi-row-5 .kpi-card:nth-child(4){animation-delay:.16s;}.kpi-row-5 .kpi-card:nth-child(5){animation-delay:.20s;}
+.kpi-row-4 .kpi-card:nth-child(1){animation-delay:.24s;}.kpi-row-4 .kpi-card:nth-child(2){animation-delay:.28s;}.kpi-row-4 .kpi-card:nth-child(3){animation-delay:.32s;}.kpi-row-4 .kpi-card:nth-child(4){animation-delay:.36s;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+</style>
+</head>
+<body id="dash">
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <a class="logo-mark" href="#">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div><div class="logo-text">SkillForge</div><div class="logo-sub">EV & Auto Analytics</div></div>
+      </a>
+    </div>
+    <nav>
+      <div class="nav-section">        
+        <div class="nav-item" onclick="navTo('sec-upload')"><div class="nav-dot"></div><a href="overview_S.html" style="text-decoration: none;color: #6b7280;">Dashboard</a></div>
+        <div class="nav-item" onclick="navTo('sec-upload')"><div class="nav-dot"></div><a href="assess.html" style="text-decoration: none;color: #6b7280;">Assessment</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item" onclick="navTo('sec-ev')"><div class="nav-dot"></div><a href="profile.html" style="color: #6b7280;text-decoration: none;">Profile</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item"><div class="nav-dot"></div><a href="setting_S.html" style="text-decoration: none;color: #6b7280;">Setting</a></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item"><div class="nav-dot"></div><a href="about_S.html" style="text-decoration: none;color: #6b7280;">About</a></div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">Dashboard</div>
+      <div style="font-size:11px;color:var(--muted);margin-left:4px;">— Resume-Driven Statistics</div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost" onclick="resetAll()">↺ Reset</button>
+        <button class="btn btn-accent" id="analyzeBtn" disabled onclick="startAnalysis()">⚡ Analyse Resume</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── SECTION: RESUME UPLOAD ── -->
+      <div id="sec-upload">
+        <div class="section-divider">
+          <div class="sdl"></div>
+          <div class="sdlabel"><div class="sddot" style="background:var(--accent);"></div><span>Step 1 — Upload Resume</span></div>
+          <div class="sdl"></div>
+        </div>
+      </div>
+
+      <div class="upload-card">
+        <div class="upload-card-head">
+          <div class="upload-card-title">📄 Resume Upload — Scores drive all dashboard statistics</div>
+          <div class="card-meta">PDF, DOCX, TXT · Max 10MB</div>
+        </div>
+        <div class="upload-card-body" style="display:flex;flex-direction:column;gap:14px;">
+
+          <!-- Drop zone -->
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt"/>
+            <div class="dz-ring">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="dz-title">Drop resume here or click to browse</div>
+            <div class="dz-sub">Drag & drop or <strong>click to select</strong> — all statistics below will update based on extracted skill scores</div>
+            <div class="fmt-pills"><span class="fmt-pill">PDF</span><span class="fmt-pill">DOCX</span><span class="fmt-pill">TXT</span></div>
+          </div>
+
+          <!-- File preview -->
+          <div class="file-preview" id="filePreview">
+            <div class="file-icon-box" id="fileIconBox">📄</div>
+            <div class="file-info">
+              <div class="file-name" id="fileName">—</div>
+              <div class="file-size" id="fileSize">—</div>
+              <div class="file-ok"><div class="file-ok-dot"></div>Ready for analysis</div>
+            </div>
+            <div class="file-rm" onclick="removeFile()">✕</div>
+          </div>
+
+          <!-- Progress -->
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-header">
+              <span id="progressLabel" style="color:var(--text);font-size:11px;">Uploading…</span>
+              <span class="progress-pct-val" id="progressPct">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-steps">
+              <div class="p-step" id="ps1"><div class="p-step-icon">1</div>Uploading</div>
+              <div class="p-step" id="ps2"><div class="p-step-icon">2</div>Parsing</div>
+              <div class="p-step" id="ps3"><div class="p-step-icon">3</div>Extracting Skills</div>
+              <div class="p-step" id="ps4"><div class="p-step-icon">4</div>Scoring Gaps</div>
+              <div class="p-step" id="ps5"><div class="p-step-icon">✓</div>Complete</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SECTION: DASHBOARD ── -->
+      <div id="sec-dashboard">
+        <div class="section-divider">
+          <div class="sdl"></div>
+          <div class="sdlabel"><div class="sddot" style="background:var(--accent2);"></div><span>Step 2 — Dashboard Overview</span></div>
+          <div class="sdl"></div>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE shown before upload -->
+      <div id="emptyState">
+        <div class="empty-state">
+          <div class="empty-icon">📊</div>
+          <div class="empty-title">No Resume Uploaded Yet</div>
+          <div class="empty-sub">Upload a resume above to automatically populate all KPIs, skill gap bars, heatmap, department table, and EV readiness statistics.</div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD STATS — hidden until resume uploaded -->
+      <div id="dashboardStats" style="display:none;flex-direction:column;gap:22px;">
+
+        <!-- Employee info bar -->
+        <div style="background:var(--surface);border:1px solid rgba(232,255,71,.15);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;animation:slideUp .4s ease forwards;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div id="empAvatar" style="width:38px;height:38px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000;">AK</div>
+            <div>
+              <div id="empNameDisplay" style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);">—</div>
+              <div id="empDeptDisplay" style="font-size:10px;color:var(--muted);">—</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;margin-left:auto;">
+            <div style="text-align:center;"><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Skills Extracted</div><div id="empSkillsExtracted" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent);">—</div></div>
+            <div style="text-align:center;"><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Gaps Found</div><div id="empGapsFound" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--danger);">—</div></div>
+            <div style="text-align:center;"><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">EV Proficiency</div><div id="empProficiency" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent2);">—</div></div>
+            <div style="text-align:center;"><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Resume Score</div><div id="empResumeScore" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--ai);">—</div></div>
+          </div>
+        </div>
+
+        <!-- KPI ROW 1 -->
+        <div class="kpi-row kpi-row-5">
+          <div class="kpi-card c4"><div class="kpi-label">Critical Skill Gaps</div><div class="kpi-value" id="kpi-critical">—</div><div class="kpi-sub" id="kpi-critical-sub">from resume analysis</div></div>
+          <div class="kpi-card c2"><div class="kpi-label">EV Readiness Score</div><div class="kpi-value" id="kpi-readiness">—</div><div class="kpi-sub" id="kpi-readiness-sub">workforce avg</div></div>
+          <div class="kpi-card c3"><div class="kpi-label">Avg Gap Score</div><div class="kpi-value" id="kpi-avggap">—</div><div class="kpi-sub" id="kpi-avggap-sub">across domains</div></div>
+          <div class="kpi-card c5"><div class="kpi-label">Skills On Target</div><div class="kpi-value" id="kpi-ontarget">—</div><div class="kpi-sub" id="kpi-ontarget-sub">above threshold</div></div>
+          <div class="kpi-card c1"><div class="kpi-label">Resume Score</div><div class="kpi-value" id="kpi-resumescore">—</div><div class="kpi-sub" id="kpi-resumescore-sub">overall rating</div></div>
+        </div>
+
+        <!-- Skill Bars + Radar -->
+        <div class="g32">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Skill Gap Breakdown — From Resume</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);"><div style="width:10px;height:2px;background:var(--accent2);border-radius:1px;"></div>Target</div>
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);"><div style="width:10px;height:2px;background:var(--muted);border-radius:1px;"></div>Resume Score</div>
+              </div>
+            </div>
+            <div class="card-body"><div class="skill-list" id="skillList"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Competency Radar</div>
+              <div class="tabs">
+                <button class="tab active" onclick="switchTab(this)">Resume</button>
+                <button class="tab" onclick="switchTab(this)">Target</button>
+                <button class="tab" onclick="switchTab(this)">Org Avg</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;justify-content:center;padding:4px 0;">
+                <canvas id="radarCanvas" width="210" height="210"></canvas>
+              </div>
+              <div style="display:flex;gap:14px;justify-content:center;margin-top:10px;">
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);"><div style="width:12px;height:2px;background:var(--accent);border-radius:1px;"></div>Resume Score</div>
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);"><div style="width:12px;height:2px;background:var(--accent2);opacity:.5;border-radius:1px;"></div>Target</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Heatmap + Alerts -->
+        <div class="g32">
+          <div class="card">
+            <div class="card-head"><div class="card-title">Skill Gap Heatmap</div><div class="card-meta">Resume Score vs Department Benchmarks</div></div>
+            <div class="card-body">
+              <div id="heatmapGrid" class="heatmap-grid"></div>
+              <div style="display:flex;gap:8px;margin-top:14px;align-items:center;">
+                <span style="font-size:9px;color:var(--muted);">SEVERITY →</span>
+                <div style="display:flex;gap:4px;">
+                  <div class="h0" style="width:22px;height:10px;border-radius:3px;"></div>
+                  <div class="h1" style="width:22px;height:10px;border-radius:3px;"></div>
+                  <div class="h2" style="width:22px;height:10px;border-radius:3px;"></div>
+                  <div class="h3" style="width:22px;height:10px;border-radius:3px;"></div>
+                  <div class="h4" style="width:22px;height:10px;border-radius:3px;"></div>
+                </div>
+                <span style="font-size:9px;color:var(--success);">Low</span>
+                <span style="font-size:9px;color:var(--accent3);">Moderate</span>
+                <span style="font-size:9px;color:var(--danger);">Critical</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">AI Gap Alerts</div><div class="card-meta" id="alertMeta">—</div></div>
+            <div class="card-body"><div class="alert-list" id="alertList"></div></div>
+          </div>
+        </div>
+
+        <!-- ── SECTION: EV READINESS ── -->
+        <div id="sec-ev">
+          <div class="section-divider">
+            <div class="sdl"></div>
+            <div class="sdlabel"><div class="sddot" style="background:var(--accent3);"></div><span>EV Domain Readiness</span></div>
+            <div class="sdl"></div>
+          </div>
+        </div>
+
+        <!-- EV Blocks + Matrix -->
+        <div class="g23">
+          <div class="card">
+            <div class="card-head"><div class="card-title">EV Domain Scores — Resume Extracted</div><div class="card-meta">vs required headcount targets</div></div>
+            <div class="card-body"><div class="ev-grid" id="evGrid"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">Gap Priority Matrix</div><div class="card-meta">Severity × Headcount Impact</div></div>
+            <div class="card-body">
+              <div class="matrix-wrap">
+                <div class="matrix-axis-y">Gap Severity →</div>
+                <div class="matrix-cell mc-tl"><div class="matrix-cell-label" style="color:var(--warn);">High Gap · Low HC</div><div id="mx-tl"></div></div>
+                <div class="matrix-cell mc-tr" style="border-color:rgba(255,68,68,.18);"><div class="matrix-cell-label" style="color:var(--danger);">High Gap · High HC 🔥</div><div id="mx-tr"></div></div>
+                <div class="matrix-cell mc-bl"><div class="matrix-cell-label" style="color:var(--success);">Low Gap · Low HC</div><div id="mx-bl"></div></div>
+                <div class="matrix-cell mc-br"><div class="matrix-cell-label" style="color:var(--accent2);">Low Gap · High HC</div><div id="mx-br"></div></div>
+                <div class="matrix-axis-x">← Headcount Impact →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION: GAP ANALYTICS ── -->
+        <div id="sec-gap">
+          <div class="section-divider">
+            <div class="sdl"></div>
+            <div class="sdlabel"><div class="sddot" style="background:var(--ai);"></div><span>Gap Analytics — Department Breakdown</span></div>
+            <div class="sdl"></div>
+          </div>
+        </div>
+
+        <!-- KPI ROW 2 -->
+        <div class="kpi-row kpi-row-4">
+          <div class="kpi-card c4"><div class="kpi-label">Critical Gaps</div><div class="kpi-value" id="kpi2-critical">—</div><div class="kpi-sub">needs immediate action</div></div>
+          <div class="kpi-card c6"><div class="kpi-label">Depts at Risk</div><div class="kpi-value" id="kpi2-depts">—</div><div class="kpi-sub">of 7 departments</div></div>
+          <div class="kpi-card c7"><div class="kpi-label">AI Readiness</div><div class="kpi-value" id="kpi2-ai">—</div><div class="kpi-sub">resume-based score</div></div>
+          <div class="kpi-card c5"><div class="kpi-label">2027 Forecast</div><div class="kpi-value" id="kpi2-forecast">—</div><div class="kpi-sub" id="kpi2-forecast-sub">if roadmap followed</div></div>
+        </div>
+
+        <!-- Dept Table -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Department Gap Report</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="card-meta" id="tableCount">7 departments</div>
+              <input style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text);outline:none;width:180px;" type="text" placeholder="🔍 Search…" oninput="filterTable(this.value)"/>
+            </div>
+          </div>
+          <div class="card-body-np">
+            <table class="dept-table">
+              <thead>
+                <tr>
+                  <th onclick="sortTable(0,this)">Department ↕</th>
+                  <th onclick="sortTable(1,this)">Headcount ↕</th>
+                  <th onclick="sortTable(2,this)">Resume Score ↕</th>
+                  <th onclick="sortTable(3,this)">Target ↕</th>
+                  <th onclick="sortTable(4,this)">Gap ↕</th>
+                  <th>Risk Level</th>
+                  <th>Progress</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody id="deptTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Roadmap -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">EV Upskilling Roadmap — Resume-Adjusted</div><div class="card-meta" id="roadmapMeta">—</div></div>
+          <div class="card-body">
+            <div class="roadmap">
+              <div class="roadmap-line"><div class="roadmap-progress-fill" id="roadmapBar" style="width:0%"></div></div>
+              <div class="roadmap-nodes" id="roadmapNodes"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /dashboardStats -->
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   SKILL DOMAIN DEFINITIONS
+══════════════════════════════════════ */
+const SKILL_DOMAINS=[
+  {id:'bms',   name:'Battery Management Systems', short:'BMS',       target:85, hc:312, evDomain:'🔋 Battery Systems',     hcNeeded:1500},
+  {id:'hv',    name:'High-Voltage Safety',         short:'HV Safety', target:90, hc:188, evDomain:null},
+  {id:'adas',  name:'ADAS & Sensor Integration',   short:'ADAS',      target:80, hc:94,  evDomain:'🤖 ADAS & Autonomy',     hcNeeded:800},
+  {id:'therm', name:'Thermal Management',          short:'Thermal',   target:85, hc:126, evDomain:null},
+  {id:'sdv',   name:'SDV / OTA Systems',           short:'SDV/OTA',   target:90, hc:211, evDomain:'💻 SDV / OTA Systems',   hcNeeded:500},
+  {id:'power', name:'Power Electronics',           short:'Power Elec',target:80, hc:188, evDomain:'⚡ Power Electronics',   hcNeeded:700},
+  {id:'charging',name:'EV Charging Infrastructure',short:'Charging',  target:75, hc:158, evDomain:null},
+];
+
+const DEPT_BASE=[
+  {name:'Battery Cell Assembly', hc:312, targetScore:85, risk:'critical'},
+  {name:'Power Electronics',     hc:188, targetScore:85, risk:'high'},
+  {name:'ADAS Engineering',      hc:94,  targetScore:85, risk:'high'},
+  {name:'Thermal Mgmt Systems',  hc:126, targetScore:85, risk:'medium'},
+  {name:'Chassis & Suspension',  hc:274, targetScore:80, risk:'medium'},
+  {name:'SDV / OTA Systems',     hc:211, targetScore:90, risk:'low'},
+  {name:'Quality & Compliance',  hc:158, targetScore:90, risk:'low'},
+];
+
+/* ══════════════════════════════════════
+   RESUME SCORES STATE
+   (simulated from uploaded file)
+══════════════════════════════════════ */
+let resumeScores=null; // null = no upload yet
+
+// Each "resume profile" has different skill scores to simulate variety
+const RESUME_PROFILES=[
+  {name:'Priya Nair',       dept:'Battery Cell Assembly', scores:{bms:38,hv:52,adas:44,therm:61,sdv:72,power:41,charging:79}},
+  {name:'Ravi Kumar',       dept:'Power Electronics',     scores:{bms:55,hv:68,adas:34,therm:48,sdv:60,power:32,charging:65}},
+  {name:'Meena Krishnamurthy',dept:'ADAS Engineering',   scores:{bms:42,hv:75,adas:58,therm:52,sdv:80,power:45,charging:70}},
+  {name:'Karthik Venkat',   dept:'SDV / OTA Systems',    scores:{bms:60,hv:70,adas:55,therm:65,sdv:82,power:58,charging:88}},
+  {name:'Anitha Balasubramanian',dept:'Thermal Mgmt Systems',scores:{bms:50,hv:65,adas:48,therm:72,sdv:55,power:50,charging:60}},
+];
+
+let selectedProfile=null;
+let sortCol=-1,sortDir=1,filterText='';
+
+/* ══════════════════════════════════════
+   FILE UPLOAD HANDLING
+══════════════════════════════════════ */
+const dropZone=document.getElementById('dropZone');
+const fileInput=document.getElementById('fileInput');
+
+function fmtBytes(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(2)+' MB';}
+function getIcon(name){const e=name.split('.').pop().toLowerCase();return e==='pdf'?'📕':e==='docx'||e==='doc'?'📘':'📄';}
+
+function showFile(file){
+  document.getElementById('fileName').textContent=file.name;
+  document.getElementById('fileSize').textContent=fmtBytes(file.size);
+  document.getElementById('fileIconBox').textContent=getIcon(file.name);
+  document.getElementById('filePreview').classList.add('show');
+  dropZone.style.display='none';
+  document.getElementById('analyzeBtn').disabled=false;
+  // pick a random profile for simulation
+  selectedProfile=RESUME_PROFILES[Math.floor(Math.random()*RESUME_PROFILES.length)];
+}
+
+fileInput.addEventListener('change',e=>{if(e.target.files[0])showFile(e.target.files[0]);});
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('dragover');if(e.dataTransfer.files[0])showFile(e.dataTransfer.files[0]);});
+
+function removeFile(){
+  fileInput.value='';
+  document.getElementById('filePreview').classList.remove('show');
+  dropZone.style.display='flex';
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('uploadProgress').classList.remove('show');
+}
+
+function resetAll(){
+  removeFile();
+  document.getElementById('emptyState').style.display='';
+  document.getElementById('dashboardStats').style.display='none';
+  resumeScores=null;
+  document.getElementById('gapBadge').textContent='—';
+  document.querySelectorAll('.p-step').forEach(s=>s.classList.remove('done','active'));
+  document.getElementById('progressBar').style.width='0%';
+  document.getElementById('progressPct').textContent='0%';
+}
+
+/* ══════════════════════════════════════
+   ANALYSIS SIMULATION → DASHBOARD UPDATE
+══════════════════════════════════════ */
+function startAnalysis(){
+  document.getElementById('analyzeBtn').disabled=true;
+  const prog=document.getElementById('uploadProgress');
+  prog.classList.add('show');
+
+  const stages=[
+    {pct:20,label:'Uploading file…',    step:'ps1'},
+    {pct:42,label:'Parsing document…', step:'ps2'},
+    {pct:65,label:'Extracting skills…',step:'ps3'},
+    {pct:88,label:'Scoring gaps…',      step:'ps4'},
+    {pct:100,label:'Complete!',         step:'ps5'},
+  ];
+  let i=0;
+  function run(){
+    if(i>=stages.length){
+      setTimeout(()=>{
+        prog.classList.remove('show');
+        document.getElementById('filePreview').classList.remove('show');
+        populateDashboard(selectedProfile);
+      },400);
+      return;
+    }
+    const s=stages[i];
+    if(i>0){const prev=document.getElementById(stages[i-1].step);prev.classList.remove('active');prev.classList.add('done');prev.querySelector('.p-step-icon').textContent='✓';}
+    document.getElementById(s.step).classList.add('active');
+    document.getElementById('progressLabel').textContent=s.label;
+    document.getElementById('progressBar').style.width=s.pct+'%';
+    document.getElementById('progressPct').textContent=s.pct+'%';
+    i++;setTimeout(run,i===stages.length?500:900);
+  }
+  setTimeout(run,200);
+}
+
+/* ══════════════════════════════════════
+   POPULATE ALL DASHBOARD FROM RESUME SCORES
+══════════════════════════════════════ */
+function populateDashboard(profile){
+  resumeScores=profile.scores;
+
+  // show dashboard
+  document.getElementById('emptyState').style.display='none';
+  const ds=document.getElementById('dashboardStats');
+  ds.style.display='flex';
+
+  // employee info bar
+  document.getElementById('empNameDisplay').textContent=profile.name;
+  document.getElementById('empDeptDisplay').textContent=profile.dept+' · Resume Analysed';
+  document.getElementById('empAvatar').textContent=profile.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+
+  const scores=Object.values(resumeScores);
+  const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  const criticalGaps=SKILL_DOMAINS.filter(d=>resumeScores[d.id]<d.target-30).length;
+  const onTarget=SKILL_DOMAINS.filter(d=>resumeScores[d.id]>=d.target-10).length;
+  const totalGap=SKILL_DOMAINS.reduce((s,d)=>s+Math.max(0,d.target-resumeScores[d.id]),0);
+  const avgGap=Math.round(totalGap/SKILL_DOMAINS.length);
+  const resumeScore=avg;
+  const readinessPct=Math.round((avg/90)*100);
+  const forecast=Math.min(99,readinessPct+27);
+
+  document.getElementById('empSkillsExtracted').textContent=SKILL_DOMAINS.length;
+  document.getElementById('empGapsFound').textContent=SKILL_DOMAINS.filter(d=>resumeScores[d.id]<d.target).length;
+  document.getElementById('empProficiency').textContent=avg+'/100';
+  document.getElementById('empResumeScore').textContent=resumeScore+'%';
+
+  // KPI Row 1
+  animateKPI('kpi-critical', criticalGaps, false);
+  animateKPI('kpi-readiness', readinessPct+'%', false);
+  animateKPI('kpi-avggap', avgGap+'pts', false);
+  animateKPI('kpi-ontarget', onTarget+'/'+SKILL_DOMAINS.length, false);
+  animateKPI('kpi-resumescore', resumeScore+'%', false);
+
+  document.getElementById('kpi-critical-sub').innerHTML=`<span class="kpi-trend ${criticalGaps>3?'trend-dn':'trend-up'}">${criticalGaps>3?'↑':'✓'} ${criticalGaps}</span> domains critical`;
+  document.getElementById('kpi-readiness-sub').innerHTML=`<span class="kpi-trend ${readinessPct>=70?'trend-up':'trend-dn'}">${readinessPct>=70?'✓':''} ${readinessPct>=70?'on track':'needs work'}</span>`;
+  document.getElementById('kpi-avggap-sub').innerHTML=`<span class="kpi-trend trend-nt">Δ${avgGap}</span> avg gap`;
+  document.getElementById('kpi-ontarget-sub').innerHTML=`<span class="kpi-trend ${onTarget>=4?'trend-up':'trend-dn'}">${onTarget>=4?'↑':'↓'} ${onTarget} domains</span>`;
+
+  // KPI Row 2
+  const deptsAtRisk=DEPT_BASE.filter(d=>['critical','high'].includes(d.risk)).length;
+  animateKPI('kpi2-critical', criticalGaps, false);
+  animateKPI('kpi2-depts', deptsAtRisk, false);
+  animateKPI('kpi2-ai', readinessPct+'%', false);
+  animateKPI('kpi2-forecast', forecast+'%', false);
+  document.getElementById('kpi2-forecast-sub').textContent=forecast>=80?'on track for 2027':'needs acceleration';
+
+  // gap badge
+  document.getElementById('gapBadge').textContent=criticalGaps;
+
+  // build skill bars
+  buildSkillBars();
+  // build radar
+  buildRadar();
+  // build heatmap
+  buildHeatmap();
+  // build alerts
+  buildAlerts(criticalGaps);
+  // build EV blocks
+  buildEVBlocks();
+  // build matrix
+  buildMatrix();
+  // build dept table
+  buildDeptTable();
+  // build roadmap
+  buildRoadmap(readinessPct);
+
+  // scroll down
+  setTimeout(()=>document.getElementById('sec-dashboard').scrollIntoView({behavior:'smooth',block:'start'}),200);
+}
+
+/* ── ANIMATE KPI VALUE ── */
+function animateKPI(id,val,isNum){
+  const el=document.getElementById(id);
+  el.classList.remove('kpi-updated');
+  void el.offsetWidth;
+  el.textContent=val;
+  el.classList.add('kpi-updated');
+}
+
+/* ── SKILL BARS ── */
+function buildSkillBars(){
+  const sl=document.getElementById('skillList');sl.innerHTML='';
+  SKILL_DOMAINS.forEach((d,i)=>{
+    const s=resumeScores[d.id];
+    const gap=d.target-s;
+    const level=gap>35?'critical':gap>20?'high':gap>10?'medium':'low';
+    sl.innerHTML+=`
+      <div class="skill-item gap-${level}" style="animation:slideUp .4s ease ${.05+i*.06}s forwards;opacity:0;">
+        <div class="skill-header">
+          <span class="skill-name">${d.name}</span>
+          <div class="skill-scores">
+            <span class="score-curr">${s}/100</span>
+            <span style="color:var(--border)">→</span>
+            <span class="score-tgt">${d.target}/100</span>
+            <span class="score-gap">Δ${Math.max(0,gap)}</span>
+          </div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${s}%"></div>
+          <div class="bar-target" style="left:${d.target}%"></div>
+        </div>
+      </div>`;
+  });
+}
+
+/* ── RADAR ── */
+function buildRadar(){
+  const canvas=document.getElementById('radarCanvas');
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,210,210);
+  const cx=105,cy=105,r=82;
+  const labels=SKILL_DOMAINS.map(d=>d.short);
+  const current=SKILL_DOMAINS.map(d=>resumeScores[d.id]/100);
+  const target=SKILL_DOMAINS.map(d=>d.target/100);
+  const n=labels.length;
+  function angle(i){return(i/n)*Math.PI*2-Math.PI/2;}
+  function pt(v,i){return[cx+r*v*Math.cos(angle(i)),cy+r*v*Math.sin(angle(i))];}
+  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
+  [.2,.4,.6,.8,1].forEach(lv=>{ctx.beginPath();for(let i=0;i<n;i++){const[x,y]=pt(lv,i);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.closePath();ctx.stroke();});
+  for(let i=0;i<n;i++){const[x,y]=pt(1,i);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.strokeStyle='rgba(255,255,255,.06)';ctx.stroke();}
+  ctx.beginPath();target.forEach((v,i)=>{const[x,y]=pt(v,i);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle='rgba(0,212,255,.06)';ctx.strokeStyle='rgba(0,212,255,.35)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.fill();ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();current.forEach((v,i)=>{const[x,y]=pt(v,i);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle='rgba(232,255,71,.1)';ctx.strokeStyle='rgba(232,255,71,.9)';ctx.lineWidth=2;ctx.fill();ctx.stroke();
+  current.forEach((v,i)=>{const[x,y]=pt(v,i);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle='#e8ff47';ctx.fill();ctx.strokeStyle='#0a0c0f';ctx.lineWidth=1.5;ctx.stroke();});
+  ctx.font='9px DM Mono,monospace';ctx.fillStyle='rgba(255,255,255,.5)';ctx.textAlign='center';
+  labels.forEach((lbl,i)=>{const[x,y]=pt(1.2,i);ctx.fillText(lbl,x,y+3);});
+}
+
+/* ── HEATMAP ── */
+function buildHeatmap(){
+  const grid=document.getElementById('heatmapGrid');grid.innerHTML='';
+  const skillH=SKILL_DOMAINS.slice(0,6).map(d=>d.short);
+  const depts=['Assembly','Powertrain','Software','Quality','Logistics','R&D'];
+  // base heatmap influenced by resume scores
+  const baseData=[[4,3,2,1,2,3],[3,4,3,2,1,4],[1,2,1,0,0,2],[2,1,2,1,1,1],[2,3,1,2,3,2],[3,2,4,3,2,4]];
+  // adjust row 0 based on worst resume skills
+  const sortedGaps=SKILL_DOMAINS.slice(0,6).map((d,i)=>{const g=d.target-resumeScores[d.id];return Math.min(4,Math.floor(g/12));});
+  baseData[0]=sortedGaps;
+
+  const labels=['Low','Moderate','High','Very High','Critical'];
+  grid.style.gridTemplateColumns=`90px repeat(${skillH.length},1fr)`;
+  grid.innerHTML+=`<div class="hm-label" style="font-size:9px;padding-bottom:4px;">Dept / Skill</div>`;
+  skillH.forEach(s=>grid.innerHTML+=`<div class="hm-col-label">${s}</div>`);
+  depts.forEach((dept,di)=>{
+    grid.innerHTML+=`<div class="hm-label">${dept}</div>`;
+    baseData[di].forEach((val,si)=>{grid.innerHTML+=`<div class="hm-cell h${val}" data-tip="${dept} × ${skillH[si]}: ${labels[val]}">${val===0?'●':val===4?'!!':val}</div>`;});
+  });
+}
+
+/* ── ALERTS ── */
+function buildAlerts(criticalCount){
+  const list=document.getElementById('alertList');list.innerHTML='';
+  document.getElementById('alertMeta').textContent=criticalCount+' unresolved';
+  const alerts=SKILL_DOMAINS
+    .map(d=>({...d,score:resumeScores[d.id],gap:d.target-resumeScores[d.id]}))
+    .sort((a,b)=>b.gap-a.gap)
+    .slice(0,5)
+    .map(d=>{
+      const type=d.gap>35?'critical':d.gap>20?'warn':'info';
+      const icon=type==='critical'?'⚠':type==='warn'?'◆':'●';
+      const time=type==='critical'?'Detected now':'Just now';
+      return`<div class="alert-item alert-${type}"><div class="alert-icon">${icon}</div><div><div class="alert-text"><strong>${d.name}</strong> — Score ${d.score}/100, gap of ${Math.max(0,d.gap)} pts vs target ${d.target}</div><div class="alert-time">${time} · Resume Analysis</div></div></div>`;
+    });
+  list.innerHTML=alerts.join('');
+}
+
+/* ── EV BLOCKS ── */
+function buildEVBlocks(){
+  const grid=document.getElementById('evGrid');grid.innerHTML='';
+  const evDomains=[
+    {icon:'🔋',title:'Battery Systems',    id:'bms',  hcCert:1020,hcNeed:1500},
+    {icon:'⚡',title:'Power Electronics',  id:'power',hcCert:287, hcNeed:700},
+    {icon:'🤖',title:'ADAS & Autonomy',    id:'adas', hcCert:456, hcNeed:800},
+    {icon:'💻',title:'SDV / OTA Systems',  id:'sdv',  hcCert:395, hcNeed:500},
+  ];
+  evDomains.forEach(d=>{
+    const score=resumeScores[d.id];
+    const pct=Math.round((score/90)*100);
+    const certAdj=Math.round(d.hcCert*(score/85));
+    grid.innerHTML+=`
+      <div class="ev-block" data-tip="${pct}% ready">
+        <div class="ev-block-icon">${d.icon}</div>
+        <div class="ev-block-title">${d.title}</div>
+        <div class="ev-block-stat">${score}%</div>
+        <div class="ev-block-label">${certAdj.toLocaleString()} / ${d.hcNeed.toLocaleString()} staff</div>
+        <div class="ev-block-bar"><div class="ev-block-bar-fill" style="width:${score}%"></div></div>
+      </div>`;
+  });
+}
+
+/* ── PRIORITY MATRIX ── */
+function buildMatrix(){
+  const mapped=SKILL_DOMAINS.map(d=>({...d,score:resumeScores[d.id],gap:d.target-resumeScores[d.id]}));
+  const highGapHighHC=mapped.filter(d=>d.gap>25&&d.hc>150);
+  const highGapLowHC=mapped.filter(d=>d.gap>25&&d.hc<=150);
+  const lowGapHighHC=mapped.filter(d=>d.gap<=25&&d.hc>150);
+  const lowGapLowHC=mapped.filter(d=>d.gap<=25&&d.hc<=150);
+
+  const mbColors=['mb-danger','mb-warn','mb-orange','mb-success','mb-cyan'];
+  function renderBubbles(arr,color){
+    return arr.slice(0,3).map(d=>`<div class="mb ${color}">${d.short} Δ${Math.max(0,d.gap)}</div>`).join('');
+  }
+  document.getElementById('mx-tr').innerHTML=renderBubbles(highGapHighHC,'mb-danger');
+  document.getElementById('mx-tl').innerHTML=renderBubbles(highGapLowHC,'mb-warn');
+  document.getElementById('mx-br').innerHTML=renderBubbles(lowGapHighHC,'mb-cyan');
+  document.getElementById('mx-bl').innerHTML=renderBubbles(lowGapLowHC,'mb-success');
+}
+
+/* ── DEPT TABLE ── */
+function buildDeptTable(){
+  // distribute resume scores across departments proportionally
+  const scoreMap={
+    'Battery Cell Assembly':resumeScores.bms,
+    'Power Electronics':resumeScores.power,
+    'ADAS Engineering':resumeScores.adas,
+    'Thermal Mgmt Systems':resumeScores.therm,
+    'Chassis & Suspension':Math.round((resumeScores.hv+resumeScores.therm)/2),
+    'SDV / OTA Systems':resumeScores.sdv,
+    'Quality & Compliance':Math.round((resumeScores.hv+resumeScores.charging)/2),
+  };
+  const deptData=DEPT_BASE.map(d=>{
+    const score=scoreMap[d.name]||60;
+    const gap=d.targetScore-score;
+    const risk=gap>35?'critical':gap>20?'high':gap>10?'medium':'low';
+    // fake 6-month trend converging to current score
+    const trend=Array.from({length:6},(_,i)=>Math.max(20,Math.round(score-(6-i)*((gap>0?1.5:-1)+(Math.random()-.5)))));
+    return{...d,score,gap,risk,trend};
+  });
+
+  const riskColors={critical:'var(--danger)',high:'var(--accent3)',medium:'var(--warn)',low:'var(--success)'};
+  let rows=[...deptData];
+  if(filterText)rows=rows.filter(r=>r.name.toLowerCase().includes(filterText));
+  if(sortCol>=0){
+    rows.sort((a,b)=>{
+      const vals=[[a.name,b.name],[a.hc,b.hc],[a.score,b.score],[a.targetScore,b.targetScore],[a.gap,b.gap]];
+      const[av,bv]=vals[sortCol];
+      return typeof av==='string'?av.localeCompare(bv)*sortDir:(av-bv)*sortDir;
+    });
+  }
+  document.getElementById('tableCount').textContent=rows.length+' departments';
+  document.getElementById('deptTbody').innerHTML=rows.map(r=>{
+    const min=Math.min(...r.trend),max=Math.max(...r.trend);
+    const sparks=r.trend.map(v=>{
+      const pct=max===min?50:Math.round(((v-min)/(max-min))*100);
+      return`<div style="flex:1;height:${Math.max(4,pct*.28)}px;background:${riskColors[r.risk]};opacity:.6;border-radius:1px;align-self:flex-end;"></div>`;
+    }).join('');
+    return`<tr>
+      <td style="color:${riskColors[r.risk]};">${r.name}</td>
+      <td style="color:var(--muted);">${r.hc.toLocaleString()}</td>
+      <td style="color:${riskColors[r.risk]};">${r.score}/100</td>
+      <td style="color:var(--accent2);">${r.targetScore}/100</td>
+      <td style="color:${r.gap>30?'var(--danger)':r.gap>20?'var(--accent3)':'var(--warn)'};">Δ${Math.max(0,r.gap)}</td>
+      <td><span class="risk-pill risk-${r.risk}">● ${r.risk.charAt(0).toUpperCase()+r.risk.slice(1)}</span></td>
+      <td><div class="mini-bar-wrap"><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${r.score}%;background:${riskColors[r.risk]};"></div></div></div></td>
+      <td><div style="display:flex;gap:2px;align-items:flex-end;height:28px;">${sparks}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── ROADMAP ── */
+function buildRoadmap(readinessPct){
+  const progress=Math.min(80,readinessPct*0.8);
+  document.getElementById('roadmapBar').style.width=progress+'%';
+  const completedSteps=progress>=70?4:progress>=50?3:progress>=30?2:1;
+  const nodes=[
+    {label:'Baseline Assessment',date:'Q1 2024'},
+    {label:'HV Safety Certification',date:'Q3 2024'},
+    {label:'Battery Bootcamp',date:'Q1 2026'},
+    {label:'ADAS & SDV Training',date:'Q4 2026'},
+    {label:'Full EV Readiness',date:'Q2 2027'},
+  ];
+  document.getElementById('roadmapMeta').textContent=Math.round(progress)+'% complete · '+
+    (readinessPct>=70?'On track':'Needs acceleration');
+
+  document.getElementById('roadmapNodes').innerHTML=nodes.map((n,i)=>`
+    <div class="rm-node ${i<completedSteps?'done':i===completedSteps?'active':''}">
+      <div class="rm-dot"></div>
+      <div class="rm-label">${n.label}<br><span class="rm-date">${n.date}</span></div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   INTERACTIONS
+══════════════════════════════════════ */
+function sortTable(col,th){
+  if(!resumeScores)return;
+  document.querySelectorAll('.dept-table th').forEach(t=>{const txt=t.textContent.replace(/[↑↓↕]/g,'').trim();t.textContent=txt+' ↕';});
+  sortCol=sortCol===col?col:(sortDir=1,col);sortDir*=-1;
+  th.textContent=th.textContent.replace(/[↑↓↕]/g,'').trim()+' '+(sortDir===1?'↑':'↓');
+  buildDeptTable();
+}
+function filterTable(v){filterText=v.toLowerCase();if(resumeScores)buildDeptTable();}
+function switchTab(el){el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function navTo(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));item.classList.add('active');});
+});
+</script>
+</body>
+</html>
